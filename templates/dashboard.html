@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <h2 class="mt-5">Dashboard</h2>
+        <p>Welcome, {{ username }}!</p>
+        <div class="mb-3">
+            <a href="{{ url_for('main') }}" class="btn btn-secondary">Back to Main Page</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+        </div>
+    </div>
+</body>
+
+</html>
