@@ -15,9 +15,31 @@
     </div>
     <br>
     <br>
-    <div class="container">
-        <p>halaman Car Management</p>
-    </div>
+    <h2>Car Management</h2>
+    <p>Halaman untuk mengelola mobil dan driver</p>
+    <form action="{{ url_for('car_management') }}" method="POST">
+        <!-- Input Nama Mobil -->
+        <div class="mb-3">
+            <label for="carName" class="form-label">Nama Mobil:</label>
+            <input type="text" class="form-control" id="carName" name="carName" placeholder="Masukkan nama mobil"
+                required>
+        </div>
+        <!-- Input No Telepon Driver -->
+        <div class="mb-3">
+            <label for="driverPhone" class="form-label">No Telepon Driver:</label>
+            <input type="tel" class="form-control" id="driverPhone" name="driverPhone"
+                placeholder="Masukkan no telepon driver" pattern="[0-9]{10,15}" required>
+            <small class="form-text text-muted">Masukkan nomor telepon dengan 10-15 digit angka.</small>
+        </div>
+        <!-- Input Keterangan -->
+        <div class="mb-3">
+            <label for="description" class="form-label">Keterangan:</label>
+            <textarea class="form-control" id="description" name="description" rows="4"
+                placeholder="Masukkan keterangan..." required></textarea>
+        </div>
+        <!-- Tombol Submit -->
+        <button type="submit" class="btn btn-primary">Simpan</button>
+    </form>
 </body>
 
 </html>
