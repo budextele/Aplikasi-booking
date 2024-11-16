@@ -55,8 +55,7 @@ def login():
             error = 'Invalid Credentials, Please try again.'
     
     return render_template('login.html', error=error)
-
-
+## Batas Akhir Halaman Login
 
 # Halaman utama
 @app.route('/main')
@@ -64,7 +63,7 @@ def main():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     return render_template('main.html', username=session['username'])
-
+## Batas Akhir Utama
 
 # Halaman dashboard
 @app.route('/dashboard/')
@@ -72,78 +71,9 @@ def dashboard():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     return render_template('dashboard.html', username=session['username'])
+## Batas Akhir Halaman Dashboard
 
-# @app.route('/car_management/')
-# def car_management():
-#     if not session.get('logged_in'):
-#         return redirect(url_for('login'))
-#     return render_template('car_management.html', username=session['username'])
-
-# @app.route('/car_management/', methods=['GET', 'POST'])
-# @login_required
-# def car_management():
-#     if request.method == 'POST':
-#         car_name = request.form['carName']
-#         driver_phone = request.form['driverPhone']
-#         description = request.form['description']
-        
-#         # Simpan data ke database atau lakukan operasi lain
-#         conn = get_db_connection()
-#         conn.execute(
-#             'INSERT INTO cars (name, driver_phone, description) VALUES (?, ?, ?)',
-#             (car_name, driver_phone, description)
-#         )
-#         conn.commit()
-#         conn.close()
-        
-#         return redirect(url_for('car_management'))  # Redirect untuk menghindari pengiriman ulang data
-#     return render_template('car_management.html', username=session['username'])
-
-# @app.route('/car_management/', methods=['GET', 'POST'])
-# @login_required
-# def car_management():
-#     if request.method == 'POST':
-#         car_name = request.form['carName']
-#         driver_phone = request.form['driverPhone']
-#         description = request.form['description']
-#         car_image = request.files['carImage']
-
-#         # Validasi file gambar
-#         if car_image and allowed_file(car_image.filename):
-#             conn = get_db_connection()
-#             # Simpan data mobil tanpa gambar dulu untuk mendapatkan ID
-#             cur = conn.execute(
-#                 'INSERT INTO cars (name, driver_phone, description, image_path) VALUES (?, ?, ?, ?)',
-#                 (car_name, driver_phone, description, None)
-#             )
-#             car_id = cur.lastrowid  # Ambil ID dari record yang baru dimasukkan
-#             conn.commit()
-
-#             # Rename gambar sesuai format "id+name"
-#             extension = car_image.filename.rsplit('.', 1)[1].lower()
-#             new_filename = f"{car_id}_{car_name.replace(' ', '_')}.{extension}"
-#             file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
-
-#             # Simpan file ke folder upload
-#             car_image.save(file_path)
-
-#             # Update path gambar ke database
-#             conn.execute(
-#                 'UPDATE cars SET image_path = ? WHERE id = ?',
-#                 (file_path, car_id)
-#             )
-#             conn.commit()
-#             conn.close()
-
-#             return redirect(url_for('car_management'))  # Redirect setelah menyimpan data
-        
-#     # Ambil semua data mobil
-#     conn = get_db_connection()
-#     cars = conn.execute("SELECT id, name, driver_phone, description FROM cars").fetchall()
-#     conn.close()
-
-#     return render_template('car_management.html', username=session['username'],  cars=cars)
-
+# Halaman Car Management
 @app.route('/car_management/', methods=['GET', 'POST'])
 @login_required
 def car_management():
@@ -245,9 +175,7 @@ def car_management():
 
     return render_template('car_management.html', cars=cars, username=session['username'])
 
-
-
-
+#tombol delete
 @app.route('/delete_car/<int:car_id>', methods=['POST'])
 @login_required
 def delete_car(car_id):
@@ -270,6 +198,7 @@ def delete_car(car_id):
     conn.close()
     return redirect(url_for('car_management'))
 
+#tombol select
 @app.route('/get_car/<int:car_id>', methods=['GET'])
 @login_required
 def get_car(car_id):
@@ -289,7 +218,7 @@ def get_car(car_id):
         })
     else:
         return jsonify({'error': 'Mobil tidak ditemukan'}), 404
-
+## batas akhir Halaman Car Management
 
 
 @app.route('/room_management/')
