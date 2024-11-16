@@ -18,6 +18,9 @@
     <h2>Car Management</h2>
     <p>Halaman untuk mengelola mobil dan driver</p>
     <form action="{{ url_for('car_management') }}" method="POST" enctype="multipart/form-data">
+        <!-- Input ID Mobil (hidden) -->
+        <input type="hidden" id="carId" name="carId" value="">
+
         <!-- Input Nama Mobil -->
         <div class="mb-3">
             <label for="carName" class="form-label">Nama Mobil:</label>
@@ -40,7 +43,7 @@
         <!-- Input Pilih Gambar -->
         <div class="mb-3">
             <label for="carImage" class="form-label">Pilih Gambar/Foto:</label>
-            <input type="file" class="form-control" id="carImage" name="carImage" accept=".jpg, .jpeg, .png" required>
+            <input type="file" class="form-control" id="carImage" name="carImage" accept=".jpg, .jpeg, .png">
             <small class="form-text text-muted">Format yang diperbolehkan: JPG, JPEG, PNG.</small>
         </div>
         <!-- Pratinjau Gambar -->
@@ -54,6 +57,40 @@
         <!-- Tombol Submit -->
         <button type="submit" class="btn btn-primary">Simpan</button>
     </form>
+
+    <!-- Tabel Data Mobil -->
+    <br>
+    <h3>Data Mobil</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nama Mobil</th>
+                <th>No Telepon Driver</th>
+                <th>Keterangan</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for car in cars %}
+            <tr>
+                <td>{{ car.id }}</td>
+                <td>{{ car.name }}</td>
+                <td>{{ car.driver_phone }}</td>
+                <td>{{ car.description }}</td>
+                <td>
+                    <!-- Tombol Select -->
+                    <button type="button" class="btn btn-success btn-sm"
+                        onclick="selectCar({{ car.id }})">Select</button>
+                    <!-- Tombol Hapus -->
+                    <form action="{{ url_for('delete_car', car_id=car.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger btn-sm"
+                            onclick="return confirm('Apakah Anda yakin ingin menghapus mobil ini?')">Hapus</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <!-- JavaScript -->
     <script>
@@ -74,6 +111,30 @@
                 previewImage.style.display = 'none'; // Sembunyikan gambar jika tidak ada file
             }
         });
+
+        // Fungsi untuk menangani tombol Select
+        function selectCar(carId) {
+            // Kirim permintaan GET ke server untuk mendapatkan data mobil
+            fetch(`/get_car/${carId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        // Isi form dengan data yang diterima
+                        document.getElementById('carId').value = carId; // Isi ID mobil
+                        document.getElementById('carName').value = data.name;
+                        document.getElementById('driverPhone').value = data.driver_phone;
+                        document.getElementById('description').value = data.description;
+
+                        // Tampilkan gambar di pratinjau
+                        const previewImage = document.getElementById('preview-image');
+                        previewImage.src = `../static/img/${data.image_path}`;
+                        previewImage.style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
     </script>
 </body>
 

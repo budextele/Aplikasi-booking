@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, render_template, redirect, url_for, request, session
+from flask import Flask, render_template, redirect, url_for, request, session, jsonify
 from functools import wraps
 from flask import session, redirect, url_for
 import os
@@ -99,45 +99,196 @@ def dashboard():
 #         return redirect(url_for('car_management'))  # Redirect untuk menghindari pengiriman ulang data
 #     return render_template('car_management.html', username=session['username'])
 
+# @app.route('/car_management/', methods=['GET', 'POST'])
+# @login_required
+# def car_management():
+#     if request.method == 'POST':
+#         car_name = request.form['carName']
+#         driver_phone = request.form['driverPhone']
+#         description = request.form['description']
+#         car_image = request.files['carImage']
+
+#         # Validasi file gambar
+#         if car_image and allowed_file(car_image.filename):
+#             conn = get_db_connection()
+#             # Simpan data mobil tanpa gambar dulu untuk mendapatkan ID
+#             cur = conn.execute(
+#                 'INSERT INTO cars (name, driver_phone, description, image_path) VALUES (?, ?, ?, ?)',
+#                 (car_name, driver_phone, description, None)
+#             )
+#             car_id = cur.lastrowid  # Ambil ID dari record yang baru dimasukkan
+#             conn.commit()
+
+#             # Rename gambar sesuai format "id+name"
+#             extension = car_image.filename.rsplit('.', 1)[1].lower()
+#             new_filename = f"{car_id}_{car_name.replace(' ', '_')}.{extension}"
+#             file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+
+#             # Simpan file ke folder upload
+#             car_image.save(file_path)
+
+#             # Update path gambar ke database
+#             conn.execute(
+#                 'UPDATE cars SET image_path = ? WHERE id = ?',
+#                 (file_path, car_id)
+#             )
+#             conn.commit()
+#             conn.close()
+
+#             return redirect(url_for('car_management'))  # Redirect setelah menyimpan data
+        
+#     # Ambil semua data mobil
+#     conn = get_db_connection()
+#     cars = conn.execute("SELECT id, name, driver_phone, description FROM cars").fetchall()
+#     conn.close()
+
+#     return render_template('car_management.html', username=session['username'],  cars=cars)
+
 @app.route('/car_management/', methods=['GET', 'POST'])
 @login_required
 def car_management():
     if request.method == 'POST':
+        car_id = request.form.get('carId')  # Ambil ID mobil dari form (jika ada)
         car_name = request.form['carName']
         driver_phone = request.form['driverPhone']
         description = request.form['description']
         car_image = request.files['carImage']
 
-        # Validasi file gambar
-        if car_image and allowed_file(car_image.filename):
-            conn = get_db_connection()
-            # Simpan data mobil tanpa gambar dulu untuk mendapatkan ID
-            cur = conn.execute(
-                'INSERT INTO cars (name, driver_phone, description, image_path) VALUES (?, ?, ?, ?)',
-                (car_name, driver_phone, description, None)
-            )
-            car_id = cur.lastrowid  # Ambil ID dari record yang baru dimasukkan
-            conn.commit()
+        conn = get_db_connection()
 
-            # Rename gambar sesuai format "id+name"
-            extension = car_image.filename.rsplit('.', 1)[1].lower()
-            new_filename = f"{car_id}_{car_name.replace(' ', '_')}.{extension}"
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+        if car_id:  # Jika ID mobil tersedia, lakukan update
+            cur = conn.execute('SELECT name, image_path FROM cars WHERE id = ?', (car_id,))
+            existing_car = cur.fetchone()
 
-            # Simpan file ke folder upload
-            car_image.save(file_path)
+            if existing_car:
+                old_name = existing_car['name']
+                old_image_path = existing_car['image_path']
 
-            # Update path gambar ke database
-            conn.execute(
-                'UPDATE cars SET image_path = ? WHERE id = ?',
-                (file_path, car_id)
-            )
-            conn.commit()
-            conn.close()
+                # Jika nama mobil berubah, rename file gambar jika ada
+                if old_name != car_name and old_image_path:
+                    old_file_path = os.path.join(app.config['UPLOAD_FOLDER'], old_image_path)
+                    extension = old_image_path.rsplit('.', 1)[1].lower()
+                    new_filename = f"{car_id}_{car_name.replace(' ', '_')}.{extension}"
+                    new_file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
 
-            return redirect(url_for('car_management'))  # Redirect setelah menyimpan data
+                    # Rename file di filesystem
+                    if os.path.exists(old_file_path):
+                        os.rename(old_file_path, new_file_path)
 
-    return render_template('car_management.html', username=session['username'])
+                    # Update path gambar di database
+                    conn.execute(
+                        'UPDATE cars SET image_path = ? WHERE id = ?',
+                        (new_filename, car_id)
+                    )
+
+                # Jika ada gambar baru yang diunggah
+                if car_image and allowed_file(car_image.filename):
+                    # Hapus gambar lama jika ada
+                    if old_image_path:
+                        old_file_path = os.path.join(app.config['UPLOAD_FOLDER'], old_image_path)
+                        if os.path.exists(old_file_path):
+                            os.remove(old_file_path)
+
+                    # Simpan gambar baru
+                    extension = car_image.filename.rsplit('.', 1)[1].lower()
+                    new_filename = f"{car_id}_{car_name.replace(' ', '_')}.{extension}"
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+                    car_image.save(file_path)
+
+                    # Update database dengan data baru
+                    conn.execute(
+                        'UPDATE cars SET image_path = ? WHERE id = ?',
+                        (new_filename, car_id)
+                    )
+
+                # Update data lain (nama, no telp, keterangan)
+                conn.execute(
+                    'UPDATE cars SET name = ?, driver_phone = ?, description = ? WHERE id = ?',
+                    (car_name, driver_phone, description, car_id)
+                )
+
+        else:  # Jika ID mobil tidak tersedia, tambahkan data baru
+            image_path = None
+            if car_image and allowed_file(car_image.filename):
+                cur = conn.execute(
+                    'INSERT INTO cars (name, driver_phone, description, image_path) VALUES (?, ?, ?, ?)',
+                    (car_name, driver_phone, description, None)
+                )
+                car_id = cur.lastrowid
+                conn.commit()
+
+                # Rename dan simpan gambar
+                extension = car_image.filename.rsplit('.', 1)[1].lower()
+                new_filename = f"{car_id}_{car_name.replace(' ', '_')}.{extension}"
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+                car_image.save(file_path)
+
+                # Update path gambar di database
+                conn.execute(
+                    'UPDATE cars SET image_path = ? WHERE id = ?',
+                    (new_filename, car_id)
+                )
+            else:
+                conn.execute(
+                    'INSERT INTO cars (name, driver_phone, description) VALUES (?, ?, ?)',
+                    (car_name, driver_phone, description)
+                )
+
+        conn.commit()
+        conn.close()
+        return redirect(url_for('car_management'))
+
+    # Ambil data mobil untuk ditampilkan di tabel
+    conn = get_db_connection()
+    cars = conn.execute('SELECT * FROM cars').fetchall()
+    conn.close()
+
+    return render_template('car_management.html', cars=cars, username=session['username'])
+
+
+
+
+@app.route('/delete_car/<int:car_id>', methods=['POST'])
+@login_required
+def delete_car(car_id):
+    conn = get_db_connection()
+
+    # Ambil path gambar sebelum menghapus data
+    car = conn.execute('SELECT image_path FROM cars WHERE id = ?', (car_id,)).fetchone()
+    if car and car['image_path']:
+        image_path = car['image_path']
+        # Tentukan path lengkap gambar
+        full_image_path = os.path.join(app.config['UPLOAD_FOLDER'], image_path)
+        
+        # Hapus file gambar jika ada
+        if os.path.exists(full_image_path):
+            os.remove(full_image_path)
+
+    # Hapus data mobil dari database
+    conn.execute('DELETE FROM cars WHERE id = ?', (car_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('car_management'))
+
+@app.route('/get_car/<int:car_id>', methods=['GET'])
+@login_required
+def get_car(car_id):
+    conn = get_db_connection()
+    car = conn.execute(
+        'SELECT id, name, driver_phone, description, image_path FROM cars WHERE id = ?',
+        (car_id,)
+    ).fetchone()
+    conn.close()
+    if car:
+        return jsonify({
+            'id': car['id'],
+            'name': car['name'],
+            'driver_phone': car['driver_phone'],
+            'description': car['description'],
+            'image_path': car['image_path']
+        })
+    else:
+        return jsonify({'error': 'Mobil tidak ditemukan'}), 404
 
 
 
