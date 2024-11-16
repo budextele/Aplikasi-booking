@@ -17,7 +17,7 @@
     <br>
     <h2>Car Management</h2>
     <p>Halaman untuk mengelola mobil dan driver</p>
-    <form action="{{ url_for('car_management') }}" method="POST">
+    <form action="{{ url_for('car_management') }}" method="POST" enctype="multipart/form-data">
         <!-- Input Nama Mobil -->
         <div class="mb-3">
             <label for="carName" class="form-label">Nama Mobil:</label>
@@ -37,9 +37,44 @@
             <textarea class="form-control" id="description" name="description" rows="4"
                 placeholder="Masukkan keterangan..." required></textarea>
         </div>
+        <!-- Input Pilih Gambar -->
+        <div class="mb-3">
+            <label for="carImage" class="form-label">Pilih Gambar/Foto:</label>
+            <input type="file" class="form-control" id="carImage" name="carImage" accept=".jpg, .jpeg, .png" required>
+            <small class="form-text text-muted">Format yang diperbolehkan: JPG, JPEG, PNG.</small>
+        </div>
+        <!-- Pratinjau Gambar -->
+        <div class="mb-3">
+            <label class="form-label">Pratinjau Gambar:</label>
+            <div id="preview-container">
+                <img id="preview-image" src="#" alt="Pratinjau Gambar"
+                    style="display: none; max-width: 100%; height: auto;">
+            </div>
+        </div>
         <!-- Tombol Submit -->
         <button type="submit" class="btn btn-primary">Simpan</button>
     </form>
+
+    <!-- JavaScript -->
+    <script>
+        // Fungsi untuk memperbarui pratinjau gambar
+        document.getElementById('carImage').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            const previewImage = document.getElementById('preview-image');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result; // Setel sumber gambar
+                    previewImage.style.display = 'block'; // Tampilkan gambar
+                };
+                reader.readAsDataURL(file); // Membaca file sebagai data URL
+            } else {
+                previewImage.src = '#';
+                previewImage.style.display = 'none'; // Sembunyikan gambar jika tidak ada file
+            }
+        });
+    </script>
 </body>
 
 </html>
