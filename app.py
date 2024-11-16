@@ -29,7 +29,7 @@ def login():
         if user:
             session['logged_in'] = True
             session['username'] = user['username']
-            return redirect(url_for('main'))
+            return redirect(url_for('dashboard'))
         else:
             error = 'Invalid Credentials, Please try again.'
     
@@ -52,6 +52,35 @@ def dashboard():
         return redirect(url_for('login'))
     return render_template('dashboard.html', username=session['username'])
 
+@app.route('/car_management/')
+def car_management():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('car_management.html', username=session['username'])
+
+@app.route('/room_management/')
+def room_management():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('room_management.html', username=session['username'])
+
+@app.route('/car_booking/')
+def car_booking():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('car_booking.html', username=session['username'])
+
+@app.route('/room_booking/')
+def room_booking():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('room_booking.html', username=session['username'])
+
+@app.route('/report/')
+def report():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    return render_template('report.html', username=session['username'])
 
 # Logout
 @app.route('/logout')
