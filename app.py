@@ -23,7 +23,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-UPLOAD_FOLDER = 'static/img'
+UPLOAD_FOLDER = 'static/picture'
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -365,11 +365,22 @@ def get_room(room_id):
 ## Batas akhir Halaman Room Management
 
 # Halaman Car Booking
-@app.route('/car_booking/')
+# @app.route('/car_booking/')
+# def car_booking():
+#     if not session.get('logged_in'):
+#         return redirect(url_for('login'))
+#     return render_template('car_booking.html', username=session['username'])
+@app.route('/car_booking', methods=['GET', 'POST'])
 def car_booking():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    return render_template('car_booking.html', username=session['username'])
+    conn = get_db_connection()
+    cars = conn.execute('SELECT id, name, driver_phone, image_path FROM cars').fetchall()  # Ambil ID dan nama mobil
+    conn.close()
+
+    if request.method == 'POST':
+        # Logika penyimpanan booking di sini...
+        pass
+
+    return render_template('car_booking.html', cars=cars)
 ## Batas akhir Halaman Car Booking
 
 # Halaman Room Booking

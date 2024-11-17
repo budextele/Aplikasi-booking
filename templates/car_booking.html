@@ -16,8 +16,107 @@
     <br>
     <br>
     <div class="container">
-        <p>halaman car Booking</p>
+        <h2>Car Management</h2>
+        <p>Halaman untuk mengelola booking mobil</p>
+        <form action="{{ url_for('car_booking') }}" method="POST" enctype="multipart/form-data">
+            <!-- Input ID booking (hidden) -->
+            <input type="hidden" id="bookingId" name="bookingId" value="">
+
+            <!-- Input Nama Mobil -->
+            <!-- <div class="mb-3">
+                <label for="carName" class="form-label">Nama Mobil:</label>
+                <input type="text" class="form-control" id="carName" name="carName" placeholder="Masukkan nama mobil"
+                    required>
+            </div> -->
+            <!-- Input Nama Mobil -->
+            <div class="mb-3">
+                <label for="carName" class="form-label">Nama Mobil:</label>
+                <select class="form-control" id="carName" name="carName" required>
+                    <option value="" disabled selected>Pilih Mobil</option>
+                    {% for car in cars %}
+                    <option value="{{ car['id'] }}" data-phone="{{ car['driver_phone'] }}"
+                        data-image="{{ url_for('static', filename='picture/' + car['image_path']) }}">
+                        {{ car['name'] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Input No Telepon Driver (Tidak Bisa Diedit) -->
+            <div class="mb-3">
+                <label for="driverPhone" class="form-label">No Telepon Driver:</label>
+                <input type="tel" class="form-control" id="driverPhone" name="driverPhone" readonly>
+            </div>
+            <!-- Input PIC -->
+            <div class="mb-3">
+                <label for="namaPIC" class="form-label">Nama PIC:</label>
+                <input type="text" class="form-control" id="namaPIC" name="namaPIC" placeholder="Masukkan Nama PIC"
+                    required>
+            </div>
+            <!-- Input waktu mulai -->
+            <div class="mb-3">
+                <label for="waktuMulai" class="form-label">Waktu Mulai Booking:</label>
+                <input type="datetime-local" class="form-control" id="waktuMulai" name="waktuMulai" required>
+            </div>
+            <!-- Input waktu selesiao -->
+            <div class="mb-3">
+                <label for="waktuSelesai" class="form-label">Waktu Selesai Booking:</label>
+                <input type="datetime-local" class="form-control" id="waktuSelesai" name="waktuSelesai" required>
+            </div>
+            <!-- Input Keterangan -->
+            <div class="mb-3">
+                <label for="description" class="form-label">Keterangan:</label>
+                <textarea class="form-control" id="description" name="description" rows="4"
+                    placeholder="Masukkan keterangan..."></textarea>
+            </div>
+            <!-- Pratinjau Gambar -->
+            <div class="mb-3">
+                <label class="form-label">Pratinjau Gambar:</label>
+                <div id="preview-container">
+                    <img id="preview-image" src="#" alt="Pratinjau Gambar"
+                        style="display: none; max-width: 100%; height: auto;">
+                </div>
+            </div>
+            <!-- Tombol Submit -->
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </form>
     </div>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function (event) {
+            const startTime = new Date(document.getElementById('waktuMulai').value);
+            const endTime = new Date(document.getElementById('waktuSelesai').value);
+
+            if (startTime >= endTime) {
+                event.preventDefault(); // Mencegah pengiriman form
+                alert('Waktu mulai harus lebih kecil dari waktu selesai.');
+            }
+        });
+
+
+        // Ambil elemen dropdown dan input lainnya
+        const carSelect = document.getElementById('carName');
+        const driverPhoneInput = document.getElementById('driverPhone');
+        const previewImage = document.getElementById('preview-image');
+
+        // Event listener untuk dropdown
+        carSelect.addEventListener('change', function () {
+            const selectedOption = carSelect.options[carSelect.selectedIndex];
+
+            // Ambil data nomor telepon dan gambar dari atribut data
+            const phone = selectedOption.getAttribute('data-phone');
+            const imagePath = selectedOption.getAttribute('data-image');
+
+            // Isi input nomor telepon dan tampilkan gambar
+            driverPhoneInput.value = phone || ''; // Jika tidak ada data, tetap kosong
+            if (imagePath) {
+                previewImage.src = imagePath;
+                previewImage.style.display = 'block'; // Tampilkan gambar
+            } else {
+                previewImage.style.display = 'none'; // Sembunyikan jika tidak ada gambar
+            }
+        });
+    </script>
 </body>
 
 </html>
