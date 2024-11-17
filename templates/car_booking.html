@@ -18,6 +18,17 @@
     <div class="container">
         <h2>Car Management</h2>
         <p>Halaman untuk mengelola booking mobil</p>
+        {% if alert %}
+        <div class="alert alert-danger" role="alert">
+            {{ alert }}
+        </div>
+        {% endif %}
+        {% if success %}
+        <div class="alert alert-success" role="alert">
+            {{ success }}
+        </div>
+        {% endif %}
+
         <form action="{{ url_for('car_booking') }}" method="POST" enctype="multipart/form-data">
             <!-- Input ID booking (hidden) -->
             <input type="hidden" id="bookingId" name="bookingId" value="">

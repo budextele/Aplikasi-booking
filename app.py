@@ -3,6 +3,8 @@ from flask import Flask, render_template, redirect, url_for, request, session, j
 from functools import wraps
 from flask import session, redirect, url_for
 import os
+from datetime import datetime
+
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'  # Ganti dengan secret key yang lebih aman
@@ -370,17 +372,87 @@ def get_room(room_id):
 #     if not session.get('logged_in'):
 #         return redirect(url_for('login'))
 #     return render_template('car_booking.html', username=session['username'])
+# @app.route('/car_booking', methods=['GET', 'POST'])
+# def car_booking():
+#     conn = get_db_connection()
+#     cars = conn.execute('SELECT id, name, driver_phone, image_path FROM cars').fetchall()  # Ambil ID dan nama mobil
+#     conn.close()
+
+#     if request.method == 'POST':
+#         # Logika penyimpanan booking di sini...
+#         pass
+
+#     return render_template('car_booking.html', cars=cars)
 @app.route('/car_booking', methods=['GET', 'POST'])
 def car_booking():
     conn = get_db_connection()
-    cars = conn.execute('SELECT id, name, driver_phone, image_path FROM cars').fetchall()  # Ambil ID dan nama mobil
-    conn.close()
-
+    cars = conn.execute('SELECT id, name, driver_phone, image_path FROM cars').fetchall()  # Ambil data mobil
     if request.method == 'POST':
-        # Logika penyimpanan booking di sini...
-        pass
+        # Ambil data dari form
+        car_id = request.form['carName']
+        pic_name = request.form['namaPIC']
+        start_time = request.form['waktuMulai']
+        end_time = request.form['waktuSelesai']
+        description = request.form.get('description', '')
 
+        # Periksa jadwal bentrok
+        overlapping_booking = conn.execute(
+            """
+            SELECT 
+                id, start_time, end_time 
+            FROM 
+                bookings 
+            WHERE 
+                item_type = 'car' AND 
+                item_id = ? AND 
+                status = 'active' AND 
+                (
+                    (start_time <= ? AND end_time > ?) OR 
+                    (start_time < ? AND end_time >= ?)
+                )
+            """,
+            (car_id, start_time, start_time, end_time, end_time)
+        ).fetchone()
+
+        # if overlapping_booking:
+        #     # Jika ada jadwal bentrok, kembalikan alert ke halaman dengan informasi jadwal bentrok
+        #     conn.close()
+        #     return render_template(
+        #         'car_booking.html',
+        #         cars=cars,
+        #         alert=f"Jadwal bentrok dengan booking ID {overlapping_booking['id']}: {overlapping_booking['start_time']} - {overlapping_booking['end_time']}"
+        #     )
+        if overlapping_booking:
+            # Format tanggal dan waktu
+            overlap_start = datetime.strptime(overlapping_booking['start_time'], "%Y-%m-%dT%H:%M").strftime("%d %B %Y, %H:%M")
+            overlap_end = datetime.strptime(overlapping_booking['end_time'], "%Y-%m-%dT%H:%M").strftime("%H:%M")
+
+            # Jika ada jadwal bentrok, kembalikan alert ke halaman dengan informasi jadwal bentrok
+            alert_message = f"Jadwal bentrok dengan booking ID {overlapping_booking['id']}: {overlap_start} - {overlap_end}"
+            conn.close()
+            return render_template(
+                'car_booking.html',
+                cars=cars,
+                alert=alert_message
+            )
+
+        # Jika tidak ada jadwal bentrok, simpan booking baru
+        conn.execute(
+            """
+            INSERT INTO bookings (item_type, item_id, pic_name, start_time, end_time, description, status)
+            VALUES ('car', ?, ?, ?, ?, ?, 'active')
+            """,
+            (car_id, pic_name, start_time, end_time, description)
+        )
+        conn.commit()
+        conn.close()
+
+        # Redirect atau tampilkan pesan sukses
+        return render_template('car_booking.html', cars=cars, success="Booking berhasil disimpan.")
+
+    conn.close()
     return render_template('car_booking.html', cars=cars)
+
 ## Batas akhir Halaman Car Booking
 
 # Halaman Room Booking
