@@ -31,7 +31,8 @@
 
         <!-- Form Input Booking -->
         <form action="{{ url_for('car_booking') }}" method="POST" enctype="multipart/form-data">
-            <input type="hidden" id="bookingId" name="bookingId" value="">
+            <input type="text" id="bookingId" name="bookingId" value="">
+            <!-- <input type="hidden" id="bookingId" name="bookingId" value=""> -->
             <div class="mb-3">
                 <label for="carName" class="form-label">Nama Mobil:</label>
                 <select class="form-control" id="carName" name="carName" required>
@@ -105,6 +106,9 @@
                     <td>{{ booking['end_time'] }}</td>
                     <td>{{ booking['description'] }}</td>
                     <td>
+                        <!-- Tombol Select -->
+                        <button type="button" class="btn btn-success btn-sm"
+                            onclick="selectBooking({{ booking.id }})">Select</button>
                         <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#cancelModal"
                             data-id="{{ booking['id'] }}">Hapus</button>
                     </td>
@@ -219,6 +223,40 @@
             const button = event.relatedTarget;
             document.getElementById('cancelBookingId').value = button.getAttribute('data-id');
         });
+
+        // Fungsi untuk menangani tombol Select
+        function selectBooking(bookingId) {
+            // Kirim permintaan GET ke server untuk mendapatkan data booking berdasarkan ID
+            fetch(`/get_booking/${bookingId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error); // Tampilkan pesan error jika ada
+                    } else {
+                        // Isi form dengan data yang diterima
+                        document.getElementById('bookingId').value = bookingId; // ID booking
+                        document.getElementById('carName').value = data.car_id; // ID mobil
+                        document.getElementById('driverPhone').value = data.driver_phone; // Nomor telepon driver
+                        document.getElementById('namaPIC').value = data.pic_name; // Nama PIC
+                        document.getElementById('waktuMulai').value = data.start_time; // Waktu mulai booking
+                        document.getElementById('waktuSelesai').value = data.end_time; // Waktu selesai booking
+                        document.getElementById('description').value = data.description; // Keterangan booking
+
+                        // Tampilkan gambar pratinjau
+                        const previewImage = document.getElementById('preview-image');
+                        if (data.image_path) {
+                            previewImage.src = `/static/picture/${data.image_path}`;
+                            previewImage.style.display = 'block';
+                        } else {
+                            previewImage.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat mengambil data booking.');
+                });
+        }
     </script>
 </body>
 

@@ -519,6 +519,55 @@ def cancel_booking():
 
     return jsonify({"success": True, "message": "Pembatalan berhasil dilakukan."})
 
+# Select booking
+@app.route('/get_booking/<int:booking_id>', methods=['GET'])
+@login_required
+def get_booking(booking_id):
+    conn = get_db_connection()
+    # Ambil data booking berdasarkan ID booking
+    booking = conn.execute(
+        '''
+        SELECT 
+            b.id AS booking_id, 
+            c.id AS car_id, 
+            c.name AS car_name, 
+            c.driver_phone, 
+            b.pic_name, 
+            b.start_time, 
+            b.end_time, 
+            b.description, 
+            c.image_path 
+        FROM bookings b
+        JOIN cars c ON b.item_id = c.id
+        WHERE b.id = ? AND b.item_type = 'car'
+        ''',
+        (booking_id,)
+    ).fetchone()
+    conn.close()
+
+    # Debugging: Cetak hasil query
+    if booking:
+        print("Hasil Query:", dict(booking))  # Debugging untuk memastikan hasil query
+        return jsonify({
+            "booking_id": booking['booking_id'],  # ID booking
+            "car_id": booking['car_id'],         # ID mobil
+            "car_name": booking['car_name'],     # Nama mobil
+            "driver_phone": booking['driver_phone'],  # No. telepon driver
+            "pic_name": booking['pic_name'] or '',    # Nama PIC
+            "start_time": booking['start_time'] or '',  # Waktu mulai
+            "end_time": booking['end_time'] or '',      # Waktu selesai
+            "description": booking['description'] or '',  # Keterangan
+            "image_path": booking['image_path'] or '',  # Path gambar
+            "error": None
+        })
+    else:
+        # Jika data booking tidak ditemukan
+        print("Error: Data booking tidak ditemukan untuk ID:", booking_id)  # Debugging
+        return jsonify({'error': 'Data booking tidak ditemukan'}), 404
+
+
+
+
 
 ## Batas akhir Halaman Car Booking
 
