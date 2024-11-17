@@ -415,16 +415,17 @@ def car_booking():
         booking['end_time'] = datetime.strptime(booking['end_time'], "%Y-%m-%dT%H:%M").strftime("%d %B %Y, %H:%M")
         bookings.append(booking)
 
-    #from input
+    # Handle POST request (insert/update booking)
     if request.method == 'POST':
         # Ambil data dari form
+        booking_id = request.form.get('bookingId')  # Nilai akan kosong jika data baru
         car_id = request.form['carName']
         pic_name = request.form['namaPIC']
         start_time = request.form['waktuMulai']
         end_time = request.form['waktuSelesai']
         description = request.form.get('description', '')
 
-        # Periksa jadwal bentrok
+        # Validasi: Periksa jadwal bentrok dengan booking lain
         overlapping_booking = conn.execute(
             """
             SELECT 
@@ -435,18 +436,19 @@ def car_booking():
                 item_type = 'car' AND 
                 item_id = ? AND 
                 status = 'active' AND 
+                id != ? AND  -- Pastikan tidak memeriksa booking yang sama
                 (
                     (start_time <= ? AND end_time > ?) OR 
                     (start_time < ? AND end_time >= ?)
                 )
             """,
-            (car_id, start_time, start_time, end_time, end_time)
+            (car_id, booking_id, start_time, start_time, end_time, end_time)
         ).fetchone()
 
         if overlapping_booking:
             # Format tanggal dan waktu
             overlap_start = datetime.strptime(overlapping_booking['start_time'], "%Y-%m-%dT%H:%M").strftime("%d %B %Y, %H:%M")
-            overlap_end = datetime.strptime(overlapping_booking['end_time'], "%Y-%m-%dT%H:%M").strftime("%H:%M")
+            overlap_end = datetime.strptime(overlapping_booking['end_time'], "%Y-%m-%dT%H:%M").strftime("%d %B %Y, %H:%M")
 
             # Jika ada jadwal bentrok, kembalikan alert ke halaman dengan informasi jadwal bentrok
             alert_message = f"Jadwal bentrok dengan booking ID {overlapping_booking['id']}: {overlap_start} - {overlap_end}"
@@ -454,25 +456,41 @@ def car_booking():
             return render_template(
                 'car_booking.html',
                 cars=cars,
+                bookings=bookings,
                 alert=alert_message
             )
 
-        # Jika tidak ada jadwal bentrok, simpan booking baru
-        conn.execute(
-            """
-            INSERT INTO bookings (item_type, item_id, pic_name, start_time, end_time, description, status)
-            VALUES ('car', ?, ?, ?, ?, ?, 'active')
-            """,
-            (car_id, pic_name, start_time, end_time, description)
-        )
+        if booking_id:
+            # Update data booking jika bookingId tidak kosong
+            conn.execute(
+                """
+                UPDATE bookings
+                SET item_id = ?, pic_name = ?, start_time = ?, end_time = ?, description = ?
+                WHERE id = ?
+                """,
+                (car_id, pic_name, start_time, end_time, description, booking_id)
+            )
+            success_message = "Booking berhasil diperbarui."
+        else:
+            # Insert data booking baru jika bookingId kosong
+            conn.execute(
+                """
+                INSERT INTO bookings (item_type, item_id, pic_name, start_time, end_time, description, status)
+                VALUES ('car', ?, ?, ?, ?, ?, 'active')
+                """,
+                (car_id, pic_name, start_time, end_time, description)
+            )
+            success_message = "Booking berhasil disimpan."
+
         conn.commit()
         conn.close()
 
         # Redirect atau tampilkan pesan sukses
-        return render_template('car_booking.html', cars=cars, success="Booking berhasil disimpan.")
+        return render_template('car_booking.html', cars=cars, bookings=bookings, success=success_message)
 
     conn.close()
     return render_template('car_booking.html', cars=cars, bookings=bookings)
+
 
 #cancel booking mobil
 # @app.route('/cancel_booking', methods=['POST'])
