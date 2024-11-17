@@ -154,15 +154,46 @@
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script>
         // Validasi Waktu Mulai dan Selesai
-        document.querySelector('form').addEventListener('submit', function (event) {
+        // document.querySelector('form').addEventListener('submit', function (event) {
+        //     const startTime = new Date(document.getElementById('waktuMulai').value);
+        //     const endTime = new Date(document.getElementById('waktuSelesai').value);
+
+        //     if (startTime >= endTime) {
+        //         event.preventDefault();
+        //         alert('Waktu mulai harus lebih kecil dari waktu selesai.');
+        //     }
+        // });
+        // Fungsi untuk memvalidasi waktu mulai dan selesai
+        // Fungsi untuk memvalidasi waktu mulai dan selesai
+        function validateBookingTimes() {
             const startTime = new Date(document.getElementById('waktuMulai').value);
             const endTime = new Date(document.getElementById('waktuSelesai').value);
 
             if (startTime >= endTime) {
-                event.preventDefault();
+                // Jika waktu mulai lebih besar atau sama dengan waktu selesai
                 alert('Waktu mulai harus lebih kecil dari waktu selesai.');
+                return false; // Menghentikan validasi
+            }
+            return true; // Validasi berhasil
+        }
+
+        // Menambahkan event listener untuk perubahan waktu mulai dan selesai
+        document.getElementById('waktuMulai').addEventListener('change', function () {
+            validateBookingTimes();
+        });
+
+        document.getElementById('waktuSelesai').addEventListener('change', function () {
+            validateBookingTimes();
+        });
+
+        // Menambahkan event listener untuk form submit
+        document.querySelector('form').addEventListener('submit', function (event) {
+            // Cek validasi hanya saat form akan disubmit
+            if (!validateBookingTimes()) {
+                event.preventDefault(); // Mencegah submit jika validasi gagal
             }
         });
+
 
         // Pratinjau Gambar
         const carSelect = document.getElementById('carName');
@@ -250,6 +281,8 @@
                         } else {
                             previewImage.style.display = 'none';
                         }
+                        // Panggil validasi setelah data dimuat ke form
+                        validateBookingTimes();
                     }
                 })
                 .catch(error => {
