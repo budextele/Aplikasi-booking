@@ -387,6 +387,35 @@ def get_room(room_id):
 def car_booking():
     conn = get_db_connection()
     cars = conn.execute('SELECT id, name, driver_phone, image_path FROM cars').fetchall()  # Ambil data mobil
+
+    # Ambil semua data booking mobil
+    bookings_raw = conn.execute(
+        """
+        SELECT 
+            b.id, 
+            b.time_booking, 
+            c.name AS car_name, 
+            b.pic_name, 
+            c.driver_phone, 
+            b.start_time, 
+            b.end_time, 
+            b.description 
+        FROM bookings b
+        JOIN cars c ON b.item_id = c.id
+        WHERE b.item_type = 'car' AND b.status = 'active'
+        """
+    ).fetchall()
+
+    # Konversi data menjadi list of dictionaries dan format waktu
+    bookings = []
+    for row in bookings_raw:
+        booking = dict(row)  # Ubah sqlite3.Row menjadi dictionary
+        booking['time_booking'] = datetime.strptime(booking['time_booking'], "%Y-%m-%d %H:%M:%S").strftime("%d %B %Y, %H:%M")
+        booking['start_time'] = datetime.strptime(booking['start_time'], "%Y-%m-%dT%H:%M").strftime("%d %B %Y, %H:%M")
+        booking['end_time'] = datetime.strptime(booking['end_time'], "%Y-%m-%dT%H:%M").strftime("%d %B %Y, %H:%M")
+        bookings.append(booking)
+
+    #from input
     if request.method == 'POST':
         # Ambil data dari form
         car_id = request.form['carName']
@@ -414,14 +443,6 @@ def car_booking():
             (car_id, start_time, start_time, end_time, end_time)
         ).fetchone()
 
-        # if overlapping_booking:
-        #     # Jika ada jadwal bentrok, kembalikan alert ke halaman dengan informasi jadwal bentrok
-        #     conn.close()
-        #     return render_template(
-        #         'car_booking.html',
-        #         cars=cars,
-        #         alert=f"Jadwal bentrok dengan booking ID {overlapping_booking['id']}: {overlapping_booking['start_time']} - {overlapping_booking['end_time']}"
-        #     )
         if overlapping_booking:
             # Format tanggal dan waktu
             overlap_start = datetime.strptime(overlapping_booking['start_time'], "%Y-%m-%dT%H:%M").strftime("%d %B %Y, %H:%M")
@@ -451,7 +472,53 @@ def car_booking():
         return render_template('car_booking.html', cars=cars, success="Booking berhasil disimpan.")
 
     conn.close()
-    return render_template('car_booking.html', cars=cars)
+    return render_template('car_booking.html', cars=cars, bookings=bookings)
+
+#cancel booking mobil
+# @app.route('/cancel_booking', methods=['POST'])
+# def cancel_booking():
+#     booking_id = request.form['bookingId']
+#     cancel_reason = request.form['cancelReason']
+
+#     # Perbarui status booking menjadi "cancelled" dan tambahkan alasan pembatalan
+#     conn = get_db_connection()
+#     conn.execute(
+#         """
+#         UPDATE bookings 
+#         SET status = 'cancelled', cancel_reason = ? 
+#         WHERE id = ?
+#         """,
+#         (cancel_reason, booking_id)
+#     )
+#     conn.commit()
+#     conn.close()
+
+#     return jsonify({"success": True, "message": "Pembatalan berhasil dilakukan."})
+@app.route('/cancel_booking', methods=['POST'])
+def cancel_booking():
+    data = request.get_json()  # Tangkap data JSON
+    booking_id = data.get('bookingId')
+    cancel_reason = data.get('cancelReason')
+
+    # Validasi data
+    if not booking_id or not cancel_reason:
+        return jsonify({"success": False, "message": "ID atau alasan pembatalan tidak valid."}), 400
+
+    # Perbarui status booking menjadi "cancelled" dan tambahkan alasan pembatalan
+    conn = get_db_connection()
+    conn.execute(
+        """
+        UPDATE bookings 
+        SET status = 'cancelled', cancel_reason = ? 
+        WHERE id = ?
+        """,
+        (cancel_reason, booking_id)
+    )
+    conn.commit()
+    conn.close()
+
+    return jsonify({"success": True, "message": "Pembatalan berhasil dilakukan."})
+
 
 ## Batas akhir Halaman Car Booking
 

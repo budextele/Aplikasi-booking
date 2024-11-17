@@ -1,0 +1,452 @@
+<!-- car booking old -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Booking</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <br>
+        {% include 'header.html' %}
+    </div>
+    <br>
+    <br>
+    <div class="container">
+        <h2>Car Management</h2>
+        <p>Halaman untuk mengelola booking mobil</p>
+        {% if alert %}
+        <div class="alert alert-danger" role="alert">
+            {{ alert }}
+        </div>
+        {% endif %}
+        {% if success %}
+        <div class="alert alert-success" role="alert">
+            {{ success }}
+        </div>
+        {% endif %}
+
+        <form action="{{ url_for('car_booking') }}" method="POST" enctype="multipart/form-data">
+            <!-- Input ID booking (hidden) -->
+            <input type="hidden" id="bookingId" name="bookingId" value="">
+            <!-- Input Nama Mobil -->
+            <div class="mb-3">
+                <label for="carName" class="form-label">Nama Mobil:</label>
+                <select class="form-control" id="carName" name="carName" required>
+                    <option value="" disabled selected>Pilih Mobil</option>
+                    {% for car in cars %}
+                    <option value="{{ car['id'] }}" data-phone="{{ car['driver_phone'] }}"
+                        data-image="{{ url_for('static', filename='picture/' + car['image_path']) }}">
+                        {{ car['name'] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Input No Telepon Driver (Tidak Bisa Diedit) -->
+            <div class="mb-3">
+                <label for="driverPhone" class="form-label">No Telepon Driver:</label>
+                <input type="tel" class="form-control" id="driverPhone" name="driverPhone" readonly>
+            </div>
+            <!-- Input PIC -->
+            <div class="mb-3">
+                <label for="namaPIC" class="form-label">Nama PIC:</label>
+                <input type="text" class="form-control" id="namaPIC" name="namaPIC" placeholder="Masukkan Nama PIC"
+                    required>
+            </div>
+            <!-- Input waktu mulai -->
+            <div class="mb-3">
+                <label for="waktuMulai" class="form-label">Waktu Mulai Booking:</label>
+                <input type="datetime-local" class="form-control" id="waktuMulai" name="waktuMulai" required>
+            </div>
+            <!-- Input waktu selesiao -->
+            <div class="mb-3">
+                <label for="waktuSelesai" class="form-label">Waktu Selesai Booking:</label>
+                <input type="datetime-local" class="form-control" id="waktuSelesai" name="waktuSelesai" required>
+            </div>
+            <!-- Input Keterangan -->
+            <div class="mb-3">
+                <label for="description" class="form-label">Keterangan:</label>
+                <textarea class="form-control" id="description" name="description" rows="4"
+                    placeholder="Masukkan keterangan..."></textarea>
+            </div>
+            <!-- Pratinjau Gambar -->
+            <div class="mb-3">
+                <label class="form-label">Pratinjau Gambar:</label>
+                <div id="preview-container">
+                    <img id="preview-image" src="#" alt="Pratinjau Gambar"
+                        style="display: none; max-width: 100%; height: auto;">
+                </div>
+            </div>
+            <!-- Tombol Submit -->
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </form>
+
+        <!-- Tabel Data Booking -->
+        <br>
+        <h3>Daftar Booking Mobil</h3>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Waktu Booking</th>
+                    <th>Nama Mobil</th>
+                    <th>Nama PIC</th>
+                    <th>No Telp Driver</th>
+                    <th>Waktu Mulai Booking</th>
+                    <th>Waktu Selesai Booking</th>
+                    <th>Keterangan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking['id'] }}</td>
+                    <td>{{ booking['time_booking'] }}</td>
+                    <td>{{ booking['car_name'] }}</td>
+                    <td>{{ booking['pic_name'] }}</td>
+                    <td>{{ booking['driver_phone'] }}</td>
+                    <td>{{ booking['start_time'] }}</td>
+                    <td>{{ booking['end_time'] }}</td>
+                    <td>{{ booking['description'] }}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm">Select</button>
+                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#cancelModal">
+                            Hapus
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelModalLabel">Konfirmasi Pembatalan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="cancelForm">
+                    <div class="modal-body">
+                        <p>Apakah Anda yakin ingin membatalkan booking ini?</p>
+                        <input type="hidden" id="cancelBookingId" name="bookingId">
+                        <div class="mb-3">
+                            <label for="cancelReason" class="form-label">Alasan Pembatalan:</label>
+                            <textarea class="form-control" id="cancelReason" name="cancelReason" rows="3"
+                                required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/jquery-3.5.1.slim.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script> -->
+
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function (event) {
+            const startTime = new Date(document.getElementById('waktuMulai').value);
+            const endTime = new Date(document.getElementById('waktuSelesai').value);
+
+            if (startTime >= endTime) {
+                event.preventDefault(); // Mencegah pengiriman form
+                alert('Waktu mulai harus lebih kecil dari waktu selesai.');
+            }
+        });
+
+
+        // Ambil elemen dropdown dan input lainnya
+        const carSelect = document.getElementById('carName');
+        const driverPhoneInput = document.getElementById('driverPhone');
+        const previewImage = document.getElementById('preview-image');
+
+        // Event listener untuk dropdown
+        carSelect.addEventListener('change', function () {
+            const selectedOption = carSelect.options[carSelect.selectedIndex];
+
+            // Ambil data nomor telepon dan gambar dari atribut data
+            const phone = selectedOption.getAttribute('data-phone');
+            const imagePath = selectedOption.getAttribute('data-image');
+
+            // Isi input nomor telepon dan tampilkan gambar
+            driverPhoneInput.value = phone || ''; // Jika tidak ada data, tetap kosong
+            if (imagePath) {
+                previewImage.src = imagePath;
+                previewImage.style.display = 'block'; // Tampilkan gambar
+            } else {
+                previewImage.style.display = 'none'; // Sembunyikan jika tidak ada gambar
+            }
+        });
+        // cancel booking
+        // Event listener untuk modal cancel
+        const cancelModal = document.getElementById('cancelModal');
+        cancelModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; // Tombol yang diklik
+            const bookingId = button.getAttribute('data-id'); // Ambil ID Booking
+            const bookingIdInput = document.getElementById('cancelBookingId');
+            bookingIdInput.value = bookingId; // Set nilai ID Booking di modal
+        });
+
+        // Proses form pembatalan
+        document.getElementById('cancelForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // Hentikan pengiriman form default
+
+            const bookingId = document.getElementById('cancelBookingId').value;
+            const cancelReason = document.getElementById('cancelReason').value;
+
+            fetch('/cancel_booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        bookingId,
+                        cancelReason
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message); // Tampilkan pesan sukses
+                        window.location.reload(); // Muat ulang halaman
+                    } else {
+                        alert('Terjadi kesalahan. Silakan coba lagi.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan jaringan.');
+                });
+        });
+    </script>
+</body>
+
+</html>
+
+
+<!-- ver 2 -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Booking</title>
+    <!-- Link ke Bootstrap CSS -->
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <br>
+        {% include 'header.html' %}
+    </div>
+    <br>
+    <div class="container">
+        <h2>Car Management</h2>
+        <p>Halaman untuk mengelola booking mobil</p>
+        {% if alert %}
+        <div class="alert alert-danger" role="alert">
+            {{ alert }}
+        </div>
+        {% endif %}
+        {% if success %}
+        <div class="alert alert-success" role="alert">
+            {{ success }}
+        </div>
+        {% endif %}
+
+        <form action="{{ url_for('car_booking') }}" method="POST" enctype="multipart/form-data">
+            <!-- Input ID booking (hidden) -->
+            <input type="hidden" id="bookingId" name="bookingId" value="">
+
+            <!-- Input Nama Mobil -->
+            <div class="mb-3">
+                <label for="carName" class="form-label">Nama Mobil:</label>
+                <select class="form-control" id="carName" name="carName" required>
+                    <option value="" disabled selected>Pilih Mobil</option>
+                    {% for car in cars %}
+                    <option value="{{ car['id'] }}" data-phone="{{ car['driver_phone'] }}"
+                        data-image="{{ url_for('static', filename='picture/' + car['image_path']) }}">
+                        {{ car['name'] }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Input No Telepon Driver -->
+            <div class="mb-3">
+                <label for="driverPhone" class="form-label">No Telepon Driver:</label>
+                <input type="tel" class="form-control" id="driverPhone" name="driverPhone" readonly>
+            </div>
+
+            <!-- Input Nama PIC -->
+            <div class="mb-3">
+                <label for="namaPIC" class="form-label">Nama PIC:</label>
+                <input type="text" class="form-control" id="namaPIC" name="namaPIC" placeholder="Masukkan Nama PIC"
+                    required>
+            </div>
+
+            <!-- Input waktu mulai -->
+            <div class="mb-3">
+                <label for="waktuMulai" class="form-label">Waktu Mulai Booking:</label>
+                <input type="datetime-local" class="form-control" id="waktuMulai" name="waktuMulai" required>
+            </div>
+
+            <!-- Input waktu selesai -->
+            <div class="mb-3">
+                <label for="waktuSelesai" class="form-label">Waktu Selesai Booking:</label>
+                <input type="datetime-local" class="form-control" id="waktuSelesai" name="waktuSelesai" required>
+            </div>
+
+            <!-- Input Keterangan -->
+            <div class="mb-3">
+                <label for="description" class="form-label">Keterangan:</label>
+                <textarea class="form-control" id="description" name="description" rows="4"
+                    placeholder="Masukkan keterangan..."></textarea>
+            </div>
+
+            <!-- Pratinjau Gambar -->
+            <div class="mb-3">
+                <label class="form-label">Pratinjau Gambar:</label>
+                <div id="preview-container">
+                    <img id="preview-image" src="#" alt="Pratinjau Gambar"
+                        style="display: none; max-width: 100%; height: auto;">
+                </div>
+            </div>
+
+            <!-- Tombol Submit -->
+            <button type="submit" class="btn btn-primary">Simpan</button>
+        </form>
+
+        <!-- Tabel Data Booking -->
+        <br>
+        <h3>Daftar Booking Mobil</h3>
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Waktu Booking</th>
+                    <th>Nama Mobil</th>
+                    <th>Nama PIC</th>
+                    <th>No Telp Driver</th>
+                    <th>Waktu Mulai Booking</th>
+                    <th>Waktu Selesai Booking</th>
+                    <th>Keterangan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking['id'] }}</td>
+                    <td>{{ booking['time_booking'] }}</td>
+                    <td>{{ booking['car_name'] }}</td>
+                    <td>{{ booking['pic_name'] }}</td>
+                    <td>{{ booking['driver_phone'] }}</td>
+                    <td>{{ booking['start_time'] }}</td>
+                    <td>{{ booking['end_time'] }}</td>
+                    <td>{{ booking['description'] }}</td>
+                    <td>
+                        <button class="btn btn-secondary btn-sm">Select</button>
+                        <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#cancelModal"
+                            data-id="{{ booking['id'] }}">Hapus</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelModalLabel">Konfirmasi Pembatalan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="cancelForm">
+                    <div class="modal-body">
+                        <p>Apakah Anda yakin ingin membatalkan booking ini?</p>
+                        <input type="hidden" id="cancelBookingId" name="bookingId">
+                        <div class="mb-3">
+                            <label for="cancelReason" class="form-label">Alasan Pembatalan:</label>
+                            <textarea class="form-control" id="cancelReason" name="cancelReason" rows="3"
+                                required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">Hapus</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/jquery-3.5.1.slim.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script>
+        // Validasi Waktu Mulai dan Selesai
+        document.querySelector('form').addEventListener('submit', function (event) {
+            const startTime = new Date(document.getElementById('waktuMulai').value);
+            const endTime = new Date(document.getElementById('waktuSelesai').value);
+
+            if (startTime >= endTime) {
+                event.preventDefault(); // Mencegah pengiriman form
+                alert('Waktu mulai harus lebih kecil dari waktu selesai.');
+            }
+        });
+
+        // Dropdown dan Pratinjau Gambar
+        const carSelect = document.getElementById('carName');
+        const driverPhoneInput = document.getElementById('driverPhone');
+        const previewImage = document.getElementById('preview-image');
+
+        carSelect.addEventListener('change', function () {
+            const selectedOption = carSelect.options[carSelect.selectedIndex];
+            const phone = selectedOption.getAttribute('data-phone');
+            const imagePath = selectedOption.getAttribute('data-image');
+
+            driverPhoneInput.value = phone || '';
+            if (imagePath) {
+                previewImage.src = imagePath;
+                previewImage.style.display = 'block';
+            } else {
+                previewImage.style.display = 'none';
+            }
+        });
+
+        // Event Listener Modal
+        const cancelModal = document.getElementById('cancelModal');
+        cancelModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const bookingId = button.getAttribute('data-id');
+            const bookingIdInput = document.getElementById('cancelBookingId');
+            bookingIdInput.value = bookingId;
+        });
+    </script>
+</body>
+
+</html>
