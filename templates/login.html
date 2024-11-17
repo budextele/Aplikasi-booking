@@ -2,37 +2,133 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <title>Login</title>
+
+  <!-- Custom fonts for this template-->
+  <link href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet"
+    type="text/css">
+
+  <!-- Custom styles for this template-->
+  <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+  <style>
+    body {
+      background: url("{{ url_for('static', filename='img/pic-login.jpg') }}") no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .card {
+      margin-top: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      /* Transparansi warna hitam */
+      color: white;
+      /* Teks warna putih */
+    }
+
+    .form-control {
+      background: rgba(255, 255, 255, 0.1);
+      /* Transparansi putih */
+      color: white;
+      border: none;
+    }
+
+    .form-control::placeholder {
+      color: #ccc;
+      /* Warna placeholder */
+    }
+
+    .form-control:focus {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      outline: none;
+      box-shadow: none;
+    }
+
+    .btn-danger {
+      background: #e3342f;
+      border: none;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+  </style>
+
 </head>
 
 <body>
-    <div class="container">
-        <h2 class="mt-5">Login</h2>
 
-        <!-- Menampilkan pesan kesalahan jika ada -->
-        {% if error %}
-        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
-            {{ error }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  <div class="container">
+
+    <!-- Outer Row -->
+    <div class="row justify-content-center mt-5">
+
+      <div class="col-xl-5 col-lg-6 col-md-4">
+
+        <div class="card o-hidden border-0 shadow-lg my-5">
+          <!-- Nested Row within Card Body -->
+          <div class="p-5">
+            <div class="text-center">
+              <h1 class="h4 mb-1"><b>Welcome!</b></h1>
+              <h1 class="h4 mb-5"><b>Booking App</b></h1>
+            </div>
+            <form class="user" id="loginForm" method="POST">
+              <div class="form-group">
+                <input type="text" name="username" class="form-control form-control-user" id="username"
+                  placeholder="Username...">
+              </div>
+              <div class="form-group">
+                <input type="password" name="password" class="form-control form-control-user" id="password"
+                  placeholder="Password...">
+              </div>
+              <button type="submit" class="btn btn-danger btn-user btn-block">Login</button>
+            </form>
+            <!-- Menampilkan pesan kesalahan jika ada -->
+            {% if error %}
+            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+              {{ error }}
+            </div>
+            {% endif %}
+            <div id="message" class="text-center mt-3"></div>
+
+          </div>
         </div>
-        {% endif %}
 
-        <form method="POST">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" class="form-control" id="username" name="username" required>
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" class="form-control" id="password" name="password" required>
-            </div>
-            <button type="submit" class="btn btn-primary mt-3">Login</button>
-        </form>
+      </div>
+
     </div>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+
+  </div>
+  <script>
+    document.getElementById("loginForm").addEventListener("submit", function (event) {
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      if (!username || !password) {
+        event.preventDefault(); // Mencegah form dikirim
+        document.getElementById("message").innerHTML =
+          "<div class='alert alert-danger alert-dismissible fade show mt-3"
+        role = "alert" > Username dan password wajib diisi! < /div>";
+      }
+    });
+
+    setTimeout(() => {
+      const alert = document.querySelector('.alert');
+      if (alert) alert.style.display = 'none';
+    }, 5000); // Hapus pesan setelah 5 detik
+  </script>
+  <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
+
 </body>
 
 </html>
