@@ -367,22 +367,6 @@ def get_room(room_id):
 ## Batas akhir Halaman Room Management
 
 # Halaman Car Booking
-# @app.route('/car_booking/')
-# def car_booking():
-#     if not session.get('logged_in'):
-#         return redirect(url_for('login'))
-#     return render_template('car_booking.html', username=session['username'])
-# @app.route('/car_booking', methods=['GET', 'POST'])
-# def car_booking():
-#     conn = get_db_connection()
-#     cars = conn.execute('SELECT id, name, driver_phone, image_path FROM cars').fetchall()  # Ambil ID dan nama mobil
-#     conn.close()
-
-#     if request.method == 'POST':
-#         # Logika penyimpanan booking di sini...
-#         pass
-
-#     return render_template('car_booking.html', cars=cars)
 @app.route('/car_booking', methods=['GET', 'POST'])
 def car_booking():
     conn = get_db_connection()
@@ -493,25 +477,6 @@ def car_booking():
 
 
 #cancel booking mobil
-# @app.route('/cancel_booking', methods=['POST'])
-# def cancel_booking():
-#     booking_id = request.form['bookingId']
-#     cancel_reason = request.form['cancelReason']
-
-#     # Perbarui status booking menjadi "cancelled" dan tambahkan alasan pembatalan
-#     conn = get_db_connection()
-#     conn.execute(
-#         """
-#         UPDATE bookings 
-#         SET status = 'cancelled', cancel_reason = ? 
-#         WHERE id = ?
-#         """,
-#         (cancel_reason, booking_id)
-#     )
-#     conn.commit()
-#     conn.close()
-
-#     return jsonify({"success": True, "message": "Pembatalan berhasil dilakukan."})
 @app.route('/cancel_booking', methods=['POST'])
 def cancel_booking():
     data = request.get_json()  # Tangkap data JSON
@@ -582,11 +547,6 @@ def get_booking(booking_id):
         # Jika data booking tidak ditemukan
         print("Error: Data booking tidak ditemukan untuk ID:", booking_id)  # Debugging
         return jsonify({'error': 'Data booking tidak ditemukan'}), 404
-
-
-
-
-
 ## Batas akhir Halaman Car Booking
 
 # Halaman Room Booking

@@ -31,8 +31,7 @@
 
         <!-- Form Input Booking -->
         <form action="{{ url_for('car_booking') }}" method="POST" enctype="multipart/form-data">
-            <input type="text" id="bookingId" name="bookingId" value="">
-            <!-- <input type="hidden" id="bookingId" name="bookingId" value=""> -->
+            <input type="hidden" id="bookingId" name="bookingId" value="">
             <div class="mb-3">
                 <label for="carName" class="form-label">Nama Mobil:</label>
                 <select class="form-control" id="carName" name="carName" required>
@@ -133,7 +132,6 @@
                     <div class="modal-body">
                         <p>Apakah Anda yakin ingin membatalkan booking ini?</p>
                         <input type="hidden" id="cancelBookingId" name="bookingId">
-                        <!-- <input type="text" id="cancelBookingId" name="bookingId"> -->
                         <div class="mb-3">
                             <label for="cancelReason" class="form-label">Alasan Pembatalan:</label>
                             <textarea class="form-control" id="cancelReason" name="cancelReason" rows="3"
@@ -153,17 +151,6 @@
     <script src="{{ url_for('static', filename='js/jquery-3.5.1.slim.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
     <script>
-        // Validasi Waktu Mulai dan Selesai
-        // document.querySelector('form').addEventListener('submit', function (event) {
-        //     const startTime = new Date(document.getElementById('waktuMulai').value);
-        //     const endTime = new Date(document.getElementById('waktuSelesai').value);
-
-        //     if (startTime >= endTime) {
-        //         event.preventDefault();
-        //         alert('Waktu mulai harus lebih kecil dari waktu selesai.');
-        //     }
-        // });
-        // Fungsi untuk memvalidasi waktu mulai dan selesai
         // Fungsi untuk memvalidasi waktu mulai dan selesai
         function validateBookingTimes() {
             const startTime = new Date(document.getElementById('waktuMulai').value);
@@ -193,7 +180,6 @@
                 event.preventDefault(); // Mencegah submit jika validasi gagal
             }
         });
-
 
         // Pratinjau Gambar
         const carSelect = document.getElementById('carName');
