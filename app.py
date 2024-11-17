@@ -53,7 +53,7 @@ def login():
             session['username'] = user['username']
             return redirect(url_for('dashboard'))
         else:
-            error = 'Invalid Credentials, Please try again.'
+            error = 'Username atau password salah.'
     
     return render_template('login.html', error=error)
 ## Batas Akhir Halaman Login
