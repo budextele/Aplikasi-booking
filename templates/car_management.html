@@ -259,7 +259,8 @@
       // Reset semua input di modal
       $(this).find('form')[0].reset();
       // Sembunyikan pratinjau gambar
-      $('#previewImage').attr('src', '').hide();
+      $('#previewImage').attr('src', ''); // Mengosongkan src
+      $('#imagePreview').hide(); // Menyembunyikan container gambar
       // Reset nilai input hidden
       $('#carId').val('');
       console.log("modal ditutup");

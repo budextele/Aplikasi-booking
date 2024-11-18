@@ -248,7 +248,9 @@
       // Reset semua input di modal
       $(this).find('form')[0].reset();
       // Sembunyikan pratinjau gambar
-      $('#previewImage').attr('src', '').hide();
+      // $('#previewImage').attr('src', '').hide();
+      $('#previewImage').attr('src', ''); // Mengosongkan src dan menyembunyikan gambar
+      $('#imagePreview').hide(); // Menyembunyikan container gambar
       // Reset nilai input hidden
       $('#roomId').val('');
       console.log("modal ditutup");
