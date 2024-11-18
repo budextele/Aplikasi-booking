@@ -83,6 +83,25 @@
                         </tr>
                       </thead>
                       <tbody>
+                        {% for car in cars %}
+                        <tr>
+                          <td>{{ car.id }}</td>
+                          <td>{{ car.name }}</td>
+                          <td>{{ car.driver_phone }}</td>
+                          <td>{{ car.description }}</td>
+                          <td>
+                            <!-- Tombol Select -->
+                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal"
+                              data-target="#myModalTambah" onclick="selectCar({{ car.id }})">Select</button>
+                            <!-- Tombol Hapus -->
+                            <form action="{{ url_for('delete_car', car_id=car.id) }}" method="POST"
+                              style="display: inline;">
+                              <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Apakah Anda yakin ingin menghapus mobil ini?')">Hapus</button>
+                            </form>
+                          </td>
+                        </tr>
+                        {% endfor %}
                       </tbody>
                     </table>
                   </div>
@@ -184,6 +203,35 @@
         reader.readAsDataURL(file);
       }
     });
+
+    // Fungsi untuk menangani tombol Select
+    function selectCar(carId) {
+      // Kirim permintaan GET ke server untuk mendapatkan data mobil
+      fetch(`/get_car/${carId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            // Isi form dengan data yang diterima
+            document.getElementById('carId').value = carId; // Isi ID mobil
+            document.getElementById('carName').value = data.name;
+            document.getElementById('driverPhone').value = data.driver_phone;
+            document.getElementById('description').value = data.description;
+
+            // Tampilkan gambar di pratinjau
+            const previewImage = document.getElementById('previewImage');
+            if (data.image_path) {
+              // Gunakan path dengan format Flask url_for
+              previewImage.src = `/static/picture/${data.image_path}`;
+              document.getElementById('imagePreview').style.display = 'block';
+            } else {
+              document.getElementById('imagePreview').style.display = 'none';
+            }
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    }
   </script>
 
 
