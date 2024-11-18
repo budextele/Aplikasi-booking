@@ -47,7 +47,7 @@
 
       <!-- Nav Item - Dashboard -->
       <li class="nav-item active">
-        <a class="nav-link" href="dashboard.html">
+        <a class="nav-link" href="{{ url_for('dashboard') }}">
           <i class="fas fa-fw fa-tachometer-alt"></i>
           <span>Dashboard</span></a>
       </li>
@@ -62,7 +62,7 @@
 
       <!-- Nav Item - Pages Collapse Menu -->
       <li class="nav-item">
-        <a class="nav-link collapsed" href="car-management.html">
+        <a class="nav-link collapsed" href="{{ url_for('car_management') }}">
           <i class="fas fa-fw fa-warehouse fa-arrow-up"></i>
           <span>Car Management</span>
         </a>
@@ -70,7 +70,7 @@
 
       <!-- Nav Item - Utilities Collapse Menu -->
       <li class="nav-item">
-        <a class="nav-link collapsed" href="room-management.html">
+        <a class="nav-link collapsed" href="{{ url_for('room_management') }}">
           <i class="fas fa-fw fa-home"></i>
           <span>Room Management</span>
         </a>
@@ -86,14 +86,14 @@
 
       <!-- Nav Item - Charts -->
       <li class="nav-item">
-        <a class="nav-link" href="">
+        <a class="nav-link" href="{{ url_for('car_booking') }}">
           <i class="fas fa-fw fa-car-side"></i>
           <span>Car Booking</span></a>
       </li>
 
       <!-- Nav Item - Tables -->
       <li class="nav-item">
-        <a class="nav-link" href="">
+        <a class="nav-link" href="{{ url_for('room_booking') }}">
           <i class="fas fa-fw fa-user-friends"></i>
           <span>Room Booking</span></a>
       </li>
@@ -103,7 +103,7 @@
 
       <!-- Nav Item - Dashboard -->
       <li class="nav-item">
-        <a class="nav-link" href="">
+        <a class="nav-link" href="{{ url_for('report') }}">
           <i class="fas fa-fw fa-file-invoice"></i>
           <span>Report</span></a>
       </li>
@@ -141,7 +141,7 @@
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown"
                 aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">nama admin</span>
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Welcome, {{ username }}</span>
                 <!-- <img class="img-profile rounded-circle" src="../static/img/boy(2).png"> -->
                 <img class="img-profile rounded-circle" src="{{ url_for('static', filename='img/boy(2).png') }}">
 
@@ -149,7 +149,7 @@
               <!-- Dropdown - User Logout -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                <a class="dropdown-item" href="{{ url_for('logout') }}">
                   <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                   Logout
                 </a>
@@ -161,7 +161,7 @@
         <!-- End of Topbar -->
 
         <!-- Begin Page Content -->
-        <div class="container-fluid">
+        <div class=" container-fluid">
 
           <!-- Page Heading -->
           <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -177,7 +177,8 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Jumlah Booking Ruangan</div>
+                      <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Jumlah Booking
+                        Ruangan</div>
                       <div class="h5 mb-0 font-weight-bold text-dark-800">100</div>
                     </div>
                     <div class="col-auto">
@@ -195,7 +196,8 @@
                 <div class="card-body">
                   <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Jumlah Booking Mobil</div>
+                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Jumlah Booking
+                        Mobil</div>
                       <div class="h5 mb-0 font-weight-bold text-dark-800">50</div>
                     </div>
                     <div class="col-auto">
