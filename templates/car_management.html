@@ -252,6 +252,19 @@
   <!-- Page level custom scripts -->
   <script src="{{ url_for('static', filename='js/demo/datatables-demo.js') }}"></script>
 
+  <script>
+    // function untuk clear inputan ketika modal terhide
+    $('#myModalTambah').on('hidden.bs.modal', function () {
+      // Reset semua input di modal
+      $(this).find('form')[0].reset();
+      // Sembunyikan pratinjau gambar
+      $('#previewImage').attr('src', '').hide();
+      // Reset nilai input hidden
+      $('#carId').val('');
+      console.log("modal ditutup");
+    });
+  </script>
+
 </body>
 
 </html>
