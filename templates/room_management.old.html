@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Management</title>
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <br>
+        {% include 'header.html' %}
+    </div>
+    <br>
+    <br>
+    <h2>Room Management</h2>
+    <p>Halaman untuk mengelola Ruangan</p>
+    <form action="{{ url_for('room_management') }}" method="POST" enctype="multipart/form-data">
+        <!-- Input ID Ruangan (hidden) -->
+        <input type="hidden" id="roomId" name="roomId" value="">
+
+        <!-- Input Nama Ruangan -->
+        <div class="mb-3">
+            <label for="roomName" class="form-label">Nama Ruangan:</label>
+            <input type="text" class="form-control" id="roomName" name="roomName" placeholder="Masukkan nama ruangan"
+                required>
+        </div>
+        <!-- Input Keterangan -->
+        <div class="mb-3">
+            <label for="description" class="form-label">Keterangan:</label>
+            <textarea class="form-control" id="description" name="description" rows="4"
+                placeholder="Masukkan keterangan..." required></textarea>
+        </div>
+        <!-- Input Pilih Gambar -->
+        <div class="mb-3">
+            <label for="roomImage" class="form-label">Pilih Gambar/Foto:</label>
+            <input type="file" class="form-control" id="roomImage" name="roomImage" accept=".jpg, .jpeg, .png">
+            <small class="form-text text-muted">Format yang diperbolehkan: JPG, JPEG, PNG.</small>
+        </div>
+        <!-- Pratinjau Gambar -->
+        <div class="mb-3">
+            <label class="form-label">Pratinjau Gambar:</label>
+            <div id="preview-container">
+                <img id="preview-image" src="#" alt="Pratinjau Gambar"
+                    style="display: none; max-width: 100%; height: auto;">
+            </div>
+        </div>
+        <!-- Tombol Submit -->
+        <button type="submit" class="btn btn-primary">Simpan</button>
+    </form>
+
+    <!-- Tabel Data Ruangan -->
+    <br>
+    <h3>Data Ruangan</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nama Ruangan</th>
+                <th>Keterangan</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for room in rooms %}
+            <tr>
+                <td>{{ room.id }}</td>
+                <td>{{ room.name }}</td>
+                <td>{{ room.description }}</td>
+                <td>
+                    <!-- Tombol Select -->
+                    <button type="button" class="btn btn-success btn-sm"
+                        onclick="selectRoom({{ room.id }})">Select</button>
+                    <!-- Tombol Hapus -->
+                    <form action="{{ url_for('delete_room', room_id=room.id) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger btn-sm"
+                            onclick="return confirm('Apakah Anda yakin ingin menghapus ruangan ini?')">Hapus</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- JavaScript -->
+    <script>
+        // Fungsi untuk memperbarui pratinjau gambar
+        document.getElementById('roomImage').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            const previewImage = document.getElementById('preview-image');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    previewImage.src = e.target.result; // Setel sumber gambar
+                    previewImage.style.display = 'block'; // Tampilkan gambar
+                };
+                reader.readAsDataURL(file); // Membaca file sebagai data URL
+            } else {
+                previewImage.src = '#';
+                previewImage.style.display = 'none'; // Sembunyikan gambar jika tidak ada file
+            }
+        });
+
+        // Fungsi untuk menangani tombol Select
+        function selectRoom(roomId) {
+            // Kirim permintaan GET ke server untuk mendapatkan data ruangan
+            fetch(`/get_room/${roomId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        // Isi form dengan data yang diterima
+                        document.getElementById('roomId').value = roomId; // Isi ID ruangan
+                        document.getElementById('roomName').value = data.name;
+                        document.getElementById('description').value = data.description;
+
+                        // Tampilkan gambar di pratinjau
+                        const previewImage = document.getElementById('preview-image');
+                        previewImage.src = `../static/picture/${data.image_path}`;
+                        previewImage.style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+
+</html>
