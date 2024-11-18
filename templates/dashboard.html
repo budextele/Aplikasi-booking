@@ -12,7 +12,6 @@
   <title>Dashboard | Booking App</title>
 
   <!-- Custom fonts for this template-->
-  <!-- <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css"> -->
   <link href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet"
     type="text/css">
   <link
@@ -20,7 +19,6 @@
     rel="stylesheet">
 
   <!-- Custom styles for this template-->
-  <!-- <link href="css/boostrap.min.css" rel="stylesheet"> -->
   <link href="{{ url_for('static', filename='css/boostrap.min.css') }}" rel="stylesheet" type="text/css">
 
 </head>
@@ -31,92 +29,7 @@
   <div id="wrapper">
 
     <!-- Sidebar -->
-    <ul class="navbar-nav bg-gradient-danger sidebar sidebar-dark accordion" id="accordionSidebar">
-
-      <!-- Sidebar - Brand -->
-      <a class="sidebar-brand d-flex align-items-center justify-content-center" href="dashboard.html">
-        <div class="sidebar-brand-icon">
-          <!-- rotate-n-15 -->
-          <i class="fas fa-calendar-check"></i>
-        </div>
-        <div class="sidebar-brand-text mx-2">Booking App</div>
-      </a>
-
-      <!-- Divider -->
-      <hr class="sidebar-divider my-0">
-
-      <!-- Nav Item - Dashboard -->
-      <li class="nav-item active">
-        <a class="nav-link" href="{{ url_for('dashboard') }}">
-          <i class="fas fa-fw fa-tachometer-alt"></i>
-          <span>Dashboard</span></a>
-      </li>
-
-      <!-- Divider -->
-      <hr class="sidebar-divider">
-
-      <!-- Heading -->
-      <div class="sidebar-heading">
-        Management
-      </div>
-
-      <!-- Nav Item - Pages Collapse Menu -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ url_for('car_management') }}">
-          <i class="fas fa-fw fa-warehouse fa-arrow-up"></i>
-          <span>Car Management</span>
-        </a>
-      </li>
-
-      <!-- Nav Item - Utilities Collapse Menu -->
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ url_for('room_management') }}">
-          <i class="fas fa-fw fa-home"></i>
-          <span>Room Management</span>
-        </a>
-      </li>
-
-      <!-- Divider -->
-      <hr class="sidebar-divider">
-
-      <!-- Heading -->
-      <div class="sidebar-heading">
-        Booking
-      </div>
-
-      <!-- Nav Item - Charts -->
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('car_booking') }}">
-          <i class="fas fa-fw fa-car-side"></i>
-          <span>Car Booking</span></a>
-      </li>
-
-      <!-- Nav Item - Tables -->
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('room_booking') }}">
-          <i class="fas fa-fw fa-user-friends"></i>
-          <span>Room Booking</span></a>
-      </li>
-
-
-      <hr class="sidebar-divider my-0">
-
-      <!-- Nav Item - Dashboard -->
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('report') }}">
-          <i class="fas fa-fw fa-file-invoice"></i>
-          <span>Report</span></a>
-      </li>
-
-      <!-- Divider -->
-      <hr class="sidebar-divider d-none d-md-block">
-
-      <!-- Sidebar Toggler (Sidebar) -->
-      <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" id="sidebarToggle"></button>
-      </div>
-
-    </ul>
+    {% include 'sidebar.html' %}
     <!-- End of Sidebar -->
 
     <!-- Content Wrapper -->
@@ -135,28 +48,7 @@
           <!-- End Sidebar Toggle (Topbar) -->
 
           <!-- Topbar Navbar -->
-          <ul class="navbar-nav ml-auto">
-            <div class="topbar-divider d-none d-sm-block"></div>
-            <!-- Nav Item - User Information -->
-            <li class="nav-item dropdown no-arrow">
-              <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown"
-                aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Welcome, {{ username }}</span>
-                <!-- <img class="img-profile rounded-circle" src="../static/img/boy(2).png"> -->
-                <img class="img-profile rounded-circle" src="{{ url_for('static', filename='img/boy(2).png') }}">
-
-              </a>
-              <!-- Dropdown - User Logout -->
-              <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="{{ url_for('logout') }}">
-                  <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                  Logout
-                </a>
-              </div>
-            </li>
-          </ul>
-
+          {% include 'topbar.html' %}
         </nav>
         <!-- End of Topbar -->
 
