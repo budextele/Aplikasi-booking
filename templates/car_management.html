@@ -100,31 +100,34 @@
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                       </div>
                       <!-- body modal -->
-                      <form>
+                      <form action="{{ url_for('car_management') }}" method="POST" enctype="multipart/form-data">
                         <div class="modal-body">
+                          <!-- Input ID Mobil (hidden) -->
+                          <input type="hidden" id="carId" name="carId" value="">
                           <!-- Nama Mobil -->
                           <div class="mb-3">
-                            <label for="namaMobil">Nama Mobil :</label>
-                            <input type="text" class="form-control" name="nama-mobil" id="namaMobil" required>
+                            <label for="carName">Nama Mobil :</label>
+                            <input type="text" class="form-control" name="carName" id="carName" required>
                           </div>
 
                           <!-- No Telp Driver -->
                           <div class="mb-3">
-                            <label for="telepon">No Telp Driver :</label>
-                            <input type="tel" class="form-control" name="telepon" id="telepon" pattern="[0-9]{10,15}"
-                              required>
+                            <label for="driverPhone">No Telp Driver :</label>
+                            <input type="tel" class="form-control" name="driverPhone" id="driverPhone"
+                              pattern="[0-9]{10,15}" required>
                           </div>
 
                           <!-- Keterangan -->
                           <div class="mb-3">
-                            <label for="keterangan">Keterangan :</label>
-                            <textarea class="form-control" name="ket" id="keterangan" rows="4"></textarea>
+                            <label for="description">Keterangan :</label>
+                            <textarea class="form-control" name="description" id="description" rows="4"></textarea>
                           </div>
 
                           <!-- Image upload input -->
                           <div class="mb-3">
-                            <label for="gambarUpload">Pilih Gambar/Foto:</label>
-                            <input type="file" class="form-control" name="gambar" id="gambarUpload" accept="image/*">
+                            <label for="carImage">Pilih Gambar/Foto:</label>
+                            <input type="file" class="form-control" name="carImage" id="carImage" accept="image/*">
+                            <small class="form-text text-muted">Format yang diperbolehkan: JPG, JPEG, PNG.</small>
                           </div>
 
                           <!-- Box to display the selected image -->
@@ -170,7 +173,7 @@
 
   <script>
     // Preview image when selected
-    document.getElementById('gambarUpload').addEventListener('change', function (e) {
+    document.getElementById('carImage').addEventListener('change', function (e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
