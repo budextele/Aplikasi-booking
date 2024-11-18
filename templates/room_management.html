@@ -82,6 +82,24 @@
                         </tr>
                       </thead>
                       <tbody>
+                        {% for room in rooms %}
+                        <tr>
+                          <td>{{ room.id }}</td>
+                          <td>{{ room.name }}</td>
+                          <td>{{ room.description }}</td>
+                          <td>
+                            <!-- Tombol Select -->
+                            <button type="button" class="btn btn-success btn-sm" data-toggle="modal"
+                              data-target="#myModalTambah" onclick="selectRoom({{ room.id }})">Select</button>
+                            <!-- Tombol Hapus -->
+                            <form action="{{ url_for('delete_room', room_id=room.id) }}" method="POST"
+                              style="display: inline;">
+                              <button type="submit" class="btn btn-danger btn-sm"
+                                onclick="return confirm('Apakah Anda yakin ingin menghapus ruangan ini?')">Hapus</button>
+                            </form>
+                          </td>
+                        </tr>
+                        {% endfor %}
                       </tbody>
                     </table>
                   </div>
@@ -99,24 +117,27 @@
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
                       </div>
                       <!-- body modal -->
-                      <form>
+                      <form action="{{ url_for('room_management') }}" method="POST" enctype="multipart/form-data">
                         <div class="modal-body">
-                          <!-- Nama Mobil -->
+                          <!-- Input ID Ruangan (hidden) -->
+                          <input type="hidden" id="roomId" name="roomId" value="">
+
+                          <!-- Nama ruangan -->
                           <div class="mb-3">
-                            <label for="namaMobil">Nama Ruangan :</label>
-                            <input type="text" class="form-control" name="nama-mobil" id="namaMobil">
+                            <label for="roomName">Nama Ruangan :</label>
+                            <input type="text" class="form-control" name="roomName" id="roomName" required>
                           </div>
 
                           <!-- Keterangan -->
                           <div class="mb-3">
-                            <label for="keterangan">Keterangan :</label>
-                            <textarea class="form-control" name="ket" id="keterangan" rows="4"></textarea>
+                            <label for="description">Keterangan :</label>
+                            <textarea class="form-control" name="description" id="description" rows="4"></textarea>
                           </div>
 
                           <!-- Image upload input -->
                           <div class="mb-3">
-                            <label for="gambarUpload">Pilih Gambar/Foto:</label>
-                            <input type="file" class="form-control" name="gambar" id="gambarUpload" accept="image/*">
+                            <label for="roomImage">Pilih Gambar/Foto:</label>
+                            <input type="file" class="form-control" name="roomImage" id="roomImage" accept="image/*">
                           </div>
 
                           <!-- Box to display the selected image -->
@@ -162,7 +183,7 @@
 
   <script>
     // Preview image when selected
-    document.getElementById('gambarUpload').addEventListener('change', function (e) {
+    document.getElementById('roomImage').addEventListener('change', function (e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
@@ -173,6 +194,34 @@
         reader.readAsDataURL(file);
       }
     });
+
+    // Fungsi untuk menangani tombol Select
+    function selectRoom(roomId) {
+      // Kirim permintaan GET ke server untuk mendapatkan data ruangan
+      fetch(`/get_room/${roomId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert(data.error);
+          } else {
+            // Isi form dengan data yang diterima
+            document.getElementById('roomId').value = roomId; // Isi ID ruangan
+            document.getElementById('roomName').value = data.name;
+            document.getElementById('description').value = data.description;
+
+            // Tampilkan gambar di pratinjau
+            const previewImage = document.getElementById('previewImage');
+            if (data.image_path) {
+              // Gunakan path dengan format Flask url_for
+              previewImage.src = `/static/picture/${data.image_path}`;
+              document.getElementById('imagePreview').style.display = 'block';
+            } else {
+              document.getElementById('imagePreview').style.display = 'none';
+            }
+          }
+        })
+        .catch(error => console.error('Error:', error));
+    }
   </script>
 
 
@@ -192,6 +241,19 @@
 
   <!-- Page level custom scripts -->
   <script src="{{ url_for('static', filename='js/demo/datatables-demo.js') }}"></script>
+
+  <script>
+    // function untuk clear inputan ketika modal terhide
+    $('#myModalTambah').on('hidden.bs.modal', function () {
+      // Reset semua input di modal
+      $(this).find('form')[0].reset();
+      // Sembunyikan pratinjau gambar
+      $('#previewImage').attr('src', '').hide();
+      // Reset nilai input hidden
+      $('#roomId').val('');
+      console.log("modal ditutup");
+    });
+  </script>
 
 </body>
 
