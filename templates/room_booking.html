@@ -2,22 +2,184 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room Booking</title>
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <link rel="shortcut icon" href="">
+  <title>Room Booking | Booking App</title>
+
+  <!-- Custom fonts for this template-->
+  <link href="{{ url_for('static', filename='vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet"
+    type="text/css">
+  <link
+    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+    rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="{{ url_for('static', filename='css/boostrap.min.css') }}" rel="stylesheet" type="text/css">
+
+  <!-- Custom styles for this page -->
+  <link href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+
 </head>
 
-<body>
-    <div class="container">
-        <br>
-        {% include 'header.html' %}
+<body id="page-top">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+
+    <!-- Sidebar -->
+    {% include 'sidebar.html' %}
+    <!-- End of Sidebar -->
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+      <!-- Main Content -->
+      <div id="content">
+
+        <!-- Topbar -->
+        <nav class="navbar navbar-expand navbar-dark bg-black topbar mb-4 static-top shadow">
+
+          <!-- Sidebar Toggle (Topbar) -->
+          <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+            <i class="fa fa-bars"></i>
+          </button>
+
+          <!-- End Sidebar Toggle (Topbar) -->
+
+          <!-- Topbar Navbar -->
+          {% include 'topbar.html' %}
+        </nav>
+        <!-- End of Topbar -->
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+          <!-- Content Row -->
+          <div class="row">
+            <div class="container-fluid">
+
+              <!-- Form Booking -->
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold">Form Booking Ruangan</h6>
+                </div>
+                <div class="card-body">
+                  <form id="formBooking" method="POST" action="">
+                    <div class="row">
+                      <!-- Left Section -->
+                      <div class="col-md-8">
+                        <div class="form-group">
+                          <label for="namaRuangan">Nama Ruangan :</label>
+                          <select class="form-control" id="namaRuangan" name="namaRuangan" required>
+                            <option value="" disabled selected>Pilih Ruangan</option>
+                            <!-- Options will be dynamically filled using JavaScript -->
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label for="namaPic">Nama PIC :</label>
+                          <input type="text" class="form-control" id="namaPic" name="namaPic" required>
+                        </div>
+                        <div class="form-group">
+                          <label for="waktuMulai">Waktu Mulai :</label>
+                          <input type="datetime-local" class="form-control" id="waktuMulai" name="waktuMulai" required>
+                        </div>
+                        <div class="form-group">
+                          <label for="waktuSelesai">Waktu Selesai :</label>
+                          <input type="datetime-local" class="form-control" id="waktuSelesai" name="waktuSelesai"
+                            required>
+                        </div>
+                        <div class="form-group">
+                          <label for="keterangan">Keterangan :</label>
+                          <textarea class="form-control" id="keterangan" name="keterangan" rows="3"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-danger">Simpan</button>
+                      </div>
+
+                      <!-- Right Section -->
+                      <div class="col-md-4">
+                        <div class="form-group">
+                          <label for="gambarRuangan">Gambar/Foto :</label>
+                          <img id="gambarMobil" src="img/pic-login.jpg" alt="Gambar Mobil" class="img-fluid border">
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- End Form Booking -->
+
+            <!-- DataTales Room-->
+            <div class="col-lg-12">
+
+              <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                  <h6 class="m-0 font-weight-bold">Data Booking Ruangan</h6>
+                </div>
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                      <thead>
+                        <tr>
+                          <th width="5%">id</th>
+                          <th style="text-align: center; vertical-align: middle;">Waktu Booking</th>
+                          <th style="text-align: center; vertical-align: middle;">Nama Ruangan</th>
+                          <th style="text-align: center; vertical-align: middle;">Nama PIC</th>
+                          <th style="text-align: center; vertical-align: middle;">Waktu Mulai</th>
+                          <th style="text-align: center; vertical-align: middle;">Waktu Selesai</th>
+                          <th style="text-align: center; vertical-align: middle;">Keterangan</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <!-- End DataTales Room-->
+
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+      </div>
+      <!-- /.container-fluid -->
+
     </div>
-    <br>
-    <br>
-    <div class="container">
-        <p>halaman Room Booking</p>
-    </div>
+    <!-- End of Main Content -->
+
+  </div>
+  <!-- End of Content Wrapper -->
+
+
+  <!-- Scroll to Top Button-->
+  <a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+  </a>
+
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="{{ url_for('static', filename='vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="{{ url_for('static', filename='js/sb-admin-2.min.js') }}"></script>
+
+  <!-- Page level plugins -->
+  <script src="{{ url_for('static', filename='vendor/datatables/jquery.dataTables.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.js') }}"></script>
+
+  <!-- Page level custom scripts -->
+  <script src="{{ url_for('static', filename='js/demo/datatables-demo.js') }}"></script>
 </body>
 
 </html>
