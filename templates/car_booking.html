@@ -302,6 +302,12 @@
       $('#formBooking').on('submit', function (event) {
         event.preventDefault(); // Mencegah pengiriman form secara default
 
+        // Cek apakah ada input dengan kelas 'is-invalid' (validasi waktu)
+        if ($('#waktuMulai').hasClass('is-invalid') || $('#waktuSelesai').hasClass('is-invalid')) {
+          alert('Waktu mulai harus lebih kecil waktu selesai.');
+          return; // Hentikan eksekusi jika ada input invalid
+        }
+
         const formData = $(this).serialize(); // Serialisasi data form
         const bookingId = $('#bookingId').val(); // Ambil nilai dari input hidden bookingId
 
