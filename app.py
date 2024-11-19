@@ -484,9 +484,11 @@ def car_booking():
 #cancel booking mobil
 @app.route('/cancel_booking', methods=['POST'])
 def cancel_booking():
-    data = request.get_json()  # Tangkap data JSON
-    booking_id = data.get('bookingId')
-    cancel_reason = data.get('cancelReason')
+    # data = request.get_json()  # Tangkap data JSON
+    # booking_id = data.get('bookingId')
+    # cancel_reason = data.get('cancelReason')
+    booking_id = request.form.get('bookingId')
+    cancel_reason = request.form.get('cancelReason')
 
     # Validasi data
     if not booking_id or not cancel_reason:
@@ -505,7 +507,11 @@ def cancel_booking():
     conn.commit()
     conn.close()
 
-    return jsonify({"success": True, "message": "Pembatalan berhasil dilakukan."})
+    # return jsonify({"success": True, "message": "Pembatalan berhasil dilakukan."})
+    return jsonify({
+        'status': 'success',
+        'message': f'Booking dengan ID {booking_id} berhasil dibatalkan.'
+    })
 
 # Select booking
 @app.route('/get_booking/<int:booking_id>', methods=['GET'])

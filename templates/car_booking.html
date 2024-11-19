@@ -180,6 +180,36 @@
 
             </div>
 
+            <!-- Modal Konfirmasi Hapus -->
+            <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel"
+              aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="cancelModalLabel">Konfirmasi Pembatalan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <form id="cancelForm" onsubmit="submitCancelForm(event)">
+                    <div class="modal-body">
+                      <p>Apakah Anda yakin ingin membatalkan booking ini?</p>
+                      <input type="hidden" id="cancelBookingId" name="bookingId">
+                      <div class="mb-3">
+                        <label for="cancelReason" class="form-label">Alasan Pembatalan:</label>
+                        <textarea class="form-control" id="cancelReason" name="cancelReason" rows="3"
+                          required></textarea>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                      <button type="submit" class="btn btn-danger">Hapus</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -267,7 +297,7 @@
       $('#waktuMulai, #waktuSelesai').on('change', validateTime);
     });
 
-    //ajax untuk submit data
+    //ajax untuk submit data - input baru & edit
     $(document).ready(function () {
       $('#formBooking').on('submit', function (event) {
         event.preventDefault(); // Mencegah pengiriman form secara default
@@ -328,6 +358,46 @@
             });
           }
         }
+      });
+    });
+
+    ////ajax untuk delete data
+    $(document).ready(function () {
+      // Untuk menyimpan ID booking ke dalam modal
+      $('#cancelModal').on('show.bs.modal', function (event) {
+        const button = $(event.relatedTarget); // Button yang memicu modal
+        const bookingId = button.data('id'); // Ambil data-id dari button
+        $('#cancelBookingId').val(bookingId); // Masukkan ke input hidden dalam modal
+      });
+
+      // AJAX untuk submit cancel form
+      $('#cancelForm').on('submit', function (event) {
+        event.preventDefault(); // Mencegah pengiriman form secara default
+
+        const cancelData = $(this).serialize(); // Serialisasi data form
+
+        $.ajax({
+          url: '/cancel_booking', // URL endpoint untuk membatalkan booking
+          type: 'POST',
+          data: cancelData,
+          success: function (response) {
+            if (response.status === 'success') {
+              alert(response.message); // Tampilkan pesan sukses
+              location.reload(); // Refresh halaman setelah pembatalan berhasil
+            } else {
+              alert('Terjadi kesalahan dalam respons.');
+            }
+          },
+          error: function (xhr) {
+            // Menampilkan pesan kesalahan jika ada
+            const errorResponse = JSON.parse(xhr.responseText);
+            if (errorResponse && errorResponse.message) {
+              alert(errorResponse.message);
+            } else {
+              alert('Terjadi kesalahan saat membatalkan booking.');
+            }
+          },
+        });
       });
     });
   </script>
