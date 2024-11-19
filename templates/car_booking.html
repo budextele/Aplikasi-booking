@@ -400,6 +400,58 @@
         });
       });
     });
+
+    // Fungsi untuk menangani tombol Select
+    function selectBooking(bookingId) {
+      // Kirim permintaan GET ke server untuk mendapatkan data booking berdasarkan ID
+      fetch(`/get_booking/${bookingId}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Server error: ' + response.status); // Menangani error server
+          }
+          return response.json(); // Mengubah response menjadi JSON
+        })
+        .then(data => {
+          if (data.error) {
+            alert(data.error); // Tampilkan pesan error jika ada
+          } else {
+            // Isi form dengan data yang diterima
+            document.getElementById('bookingId').value = bookingId; // ID booking
+            document.getElementById('carName').value = data.car_id; // ID mobil
+            document.getElementById('noTelpDriver').value = data.driver_phone; // Nomor telepon driver
+            document.getElementById('namaPIC').value = data.pic_name; // Nama PIC
+            document.getElementById('waktuMulai').value = data.start_time; // Waktu mulai booking
+            document.getElementById('waktuSelesai').value = data.end_time; // Waktu selesai booking
+            document.getElementById('description').value = data.description; // Keterangan booking
+
+            // Tampilkan gambar pratinjau jika ada
+            const previewImage = document.getElementById('preview-image');
+            if (data.image_path) {
+              previewImage.src = `/static/picture/${data.image_path}`;
+              previewImage.style.display = 'block';
+            } else {
+              previewImage.style.display = 'none';
+            }
+
+            // Menangani pembaruan data nomor telepon driver dan gambar
+            const carSelect = document.getElementById('carName');
+            const selectedOption = carSelect.querySelector(`option[value='${data.car_id}']`);
+            if (selectedOption) {
+              const driverPhone = selectedOption.getAttribute('data-phone');
+              document.getElementById('noTelpDriver').value = driverPhone; // Pembaruan nomor telepon driver
+
+              // Pembaruan gambar mobil
+              const carImage = selectedOption.getAttribute('data-image');
+              previewImage.src = carImage;
+            }
+
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Terjadi kesalahan saat mengambil data booking: ' + error.message); // Tampilkan error pesan
+        });
+    }
   </script>
 
 </body>
