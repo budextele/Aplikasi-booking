@@ -72,9 +72,10 @@
                     enctype="multipart/form-data">
                     <div class="row">
                       <!-- Left Section -->
-                      <input type="hidden" id="bookingId" name="bookingId" value="">
                       <div class="col-md-8">
                         <div class="form-group">
+                          <!-- <input type="hidden" id="bookingId" name="bookingId" value=""> -->
+                          <input type="text" id="bookingId" name="bookingId" value="">
                           <label for="carName">Nama Mobil :</label>
                           <select class="form-control" id="carName" name="carName" required>
                             <option value="" disabled selected>Pilih Mobil</option>
@@ -238,7 +239,7 @@
       });
     });
 
-    // validasi waktu mulai <= waktu selesai
+    // validasi waktu mulai >= waktu selesai
     $(document).ready(function () {
       // Fungsi validasi waktu
       function validateTime() {
@@ -264,6 +265,42 @@
 
       // Pantau perubahan pada kedua input
       $('#waktuMulai, #waktuSelesai').on('change', validateTime);
+    });
+
+    //ajax untuk submit data
+    $(document).ready(function () {
+      $('#formBooking').on('submit', function (event) {
+        event.preventDefault(); // Mencegah pengiriman form secara default
+
+        const formData = $(this).serialize(); // Serialisasi data form
+        $.ajax({
+          url: $(this).attr('action'), // URL tujuan (diambil dari form)
+          type: 'POST',
+          data: formData,
+          success: function (response) {
+            if (response.status === 'success') {
+              alert(response.message); // Tampilkan pesan sukses
+              // $('#formBooking')[0].reset(); // Reset form setelah submit
+              // // Reset gambar pratinjau
+              // $('#preview-image')
+              //   .attr('src', '#') // Atur kembali src menjadi '#' atau default
+              //   .css('display', 'none'); // Sembunyikan gambar
+              location.reload();
+            } else {
+              alert('Terjadi kesalahan dalam respons.');
+            }
+          },
+          error: function (xhr) {
+            // Menampilkan pesan kesalahan jika ada
+            const errorResponse = JSON.parse(xhr.responseText);
+            if (errorResponse && errorResponse.message) {
+              alert(errorResponse.message);
+            } else {
+              alert('Terjadi kesalahan saat menyimpan data.');
+            }
+          },
+        });
+      });
     });
   </script>
 

@@ -469,8 +469,13 @@ def car_booking():
         conn.commit()
         conn.close()
 
-        # Redirect atau tampilkan pesan sukses
-        return render_template('car_booking.html', cars=cars, bookings=bookings, success=success_message)
+        # # Redirect atau tampilkan pesan sukses
+        # return render_template('car_booking.html', cars=cars, bookings=bookings, success=success_message)
+        # Kembalikan respons JSON untuk sukses
+        return jsonify({
+            'status': 'success',
+            'message': success_message,
+        }), 200  # HTTP status code 200 untuk sukses
 
     conn.close()
     return render_template('car_booking.html', cars=cars, bookings=bookings)
