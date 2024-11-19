@@ -68,15 +68,21 @@
                   <h6 class="m-0 font-weight-bold">Form Booking Mobil</h6>
                 </div>
                 <div class="card-body">
-                  <form id="formBooking" method="POST" action="">
+                  <form id="formBooking" action="{{ url_for('car_booking') }}" method="POST"
+                    enctype="multipart/form-data">
                     <div class="row">
                       <!-- Left Section -->
                       <div class="col-md-8">
                         <div class="form-group">
-                          <label for="namaMobil">Nama Mobil :</label>
-                          <select class="form-control" id="namaMobil" name="namaMobil" required>
+                          <label for="carName">Nama Mobil :</label>
+                          <select class="form-control" id="carName" name="carName" required>
                             <option value="" disabled selected>Pilih Mobil</option>
-                            <!-- Options will be dynamically filled using JavaScript -->
+                            {% for car in cars %}
+                            <option value="{{ car['id'] }}" data-phone="{{ car['driver_phone'] }}"
+                              data-image="{{ url_for('static', filename='picture/' + car['image_path']) }}">
+                              {{ car['name'] }}
+                            </option>
+                            {% endfor %}
                           </select>
                         </div>
                         <div class="form-group">
@@ -104,10 +110,11 @@
                       </div>
 
                       <!-- Right Section -->
-                      <div class="col-md-4">
+                      <div id="imagePreview" class="col-md-4">
                         <div class="form-group">
-                          <label for="gambarMobil">Gambar/Foto :</label>
-                          <img id="gambarMobil" src="img/pic-login.jpg" alt="Gambar Mobil" class="img-fluid border">
+                          <label for="preview-image">Gambar/Foto :</label>
+                          <img id="preview-image" src="#" alt="Gambar Mobil" class="img-fluid border"
+                            style="display: none;">
                         </div>
                       </div>
                     </div>
@@ -185,6 +192,30 @@
 
   <!-- Page level custom scripts -->
   <script src="{{ url_for('static', filename='js/demo/datatables-demo.js') }}"></script>
+  <script>
+    // Pratinjau Gambar
+    $(document).ready(function () {
+      // Pratinjau gambar berdasarkan mobil yang dipilih
+      $('#carName').on('change', function () {
+        const selectedOption = $(this).find(':selected');
+        const imageSrc = selectedOption.data('image'); // Ambil atribut data-image dari option yang dipilih
+        const driverPhone = selectedOption.data('phone'); // Ambil atribut data-phone dari option yang dipilih
+
+        if (imageSrc) {
+          // Set src gambar dan tampilkan gambar
+          $('#preview-image').attr('src', imageSrc).show();
+          $('#imagePreview').show();
+        } else {
+          // Jika tidak ada gambar, sembunyikan elemen gambar
+          $('#preview-image').hide();
+          $('#imagePreview').hide();
+        }
+
+        // Isi nomor telepon driver ke input
+        $('#noTelpDriver').val(driverPhone || '');
+      });
+    });
+  </script>
 
 </body>
 
