@@ -273,33 +273,61 @@
         event.preventDefault(); // Mencegah pengiriman form secara default
 
         const formData = $(this).serialize(); // Serialisasi data form
-        $.ajax({
-          url: $(this).attr('action'), // URL tujuan (diambil dari form)
-          type: 'POST',
-          data: formData,
-          success: function (response) {
-            if (response.status === 'success') {
-              alert(response.message); // Tampilkan pesan sukses
-              // $('#formBooking')[0].reset(); // Reset form setelah submit
-              // // Reset gambar pratinjau
-              // $('#preview-image')
-              //   .attr('src', '#') // Atur kembali src menjadi '#' atau default
-              //   .css('display', 'none'); // Sembunyikan gambar
-              location.reload();
-            } else {
-              alert('Terjadi kesalahan dalam respons.');
-            }
-          },
-          error: function (xhr) {
-            // Menampilkan pesan kesalahan jika ada
-            const errorResponse = JSON.parse(xhr.responseText);
-            if (errorResponse && errorResponse.message) {
-              alert(errorResponse.message);
-            } else {
-              alert('Terjadi kesalahan saat menyimpan data.');
-            }
-          },
-        });
+        const bookingId = $('#bookingId').val(); // Ambil nilai dari input hidden bookingId
+
+        if (!bookingId) {
+          // Jika bookingId kosong, lanjutkan proses input data
+          $.ajax({
+            url: $(this).attr('action'), // URL tujuan (diambil dari form)
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+              if (response.status === 'success') {
+                alert(response.message); // Tampilkan pesan sukses
+                location.reload(); // Refresh halaman setelah sukses
+              } else {
+                alert('Terjadi kesalahan dalam respons.');
+              }
+            },
+            error: function (xhr) {
+              // Menampilkan pesan kesalahan jika ada
+              const errorResponse = JSON.parse(xhr.responseText);
+              if (errorResponse && errorResponse.message) {
+                alert(errorResponse.message);
+              } else {
+                alert('Terjadi kesalahan saat menyimpan data.');
+              }
+            },
+          });
+        } else {
+          // Jika bookingId tidak kosong, tampilkan konfirmasi
+          const confirmUpdate = confirm(`Apakah Anda yakin ingin merubah data booking dengan ID ${bookingId}?`);
+          if (confirmUpdate) {
+            // Jika pengguna memilih "OK", lanjutkan POST
+            $.ajax({
+              url: $(this).attr('action'), // URL tujuan (diambil dari form)
+              type: 'POST',
+              data: formData,
+              success: function (response) {
+                if (response.status === 'success') {
+                  alert(response.message); // Tampilkan pesan sukses
+                  location.reload(); // Refresh halaman setelah sukses
+                } else {
+                  alert('Terjadi kesalahan dalam respons.');
+                }
+              },
+              error: function (xhr) {
+                // Menampilkan pesan kesalahan jika ada
+                const errorResponse = JSON.parse(xhr.responseText);
+                if (errorResponse && errorResponse.message) {
+                  alert(errorResponse.message);
+                } else {
+                  alert('Terjadi kesalahan saat menyimpan data.');
+                }
+              },
+            });
+          }
+        }
       });
     });
   </script>
