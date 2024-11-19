@@ -72,6 +72,7 @@
                     enctype="multipart/form-data">
                     <div class="row">
                       <!-- Left Section -->
+                      <input type="hidden" id="bookingId" name="bookingId" value="">
                       <div class="col-md-8">
                         <div class="form-group">
                           <label for="carName">Nama Mobil :</label>
@@ -90,8 +91,8 @@
                           <input type="text" class="form-control" id="noTelpDriver" name="noTelpDriver" readonly>
                         </div>
                         <div class="form-group">
-                          <label for="namaPic">Nama PIC :</label>
-                          <input type="text" class="form-control" id="namaPic" name="namaPic" required>
+                          <label for="namaPIC">Nama PIC :</label>
+                          <input type="text" class="form-control" id="namaPIC" name="namaPIC" required>
                         </div>
                         <div class="form-group">
                           <label for="waktuMulai">Waktu Mulai :</label>
@@ -103,8 +104,8 @@
                             required>
                         </div>
                         <div class="form-group">
-                          <label for="keterangan">Keterangan :</label>
-                          <textarea class="form-control" id="keterangan" name="keterangan" rows="3"></textarea>
+                          <label for="description">Keterangan :</label>
+                          <textarea class="form-control" id="description" name="description" rows="3"></textarea>
                         </div>
                         <button type="submit" class="btn btn-danger">Simpan</button>
                       </div>
@@ -145,9 +146,29 @@
                           <th style="text-align: center; vertical-align: middle;">Waktu Mulai</th>
                           <th style="text-align: center; vertical-align: middle;">Waktu Selesai</th>
                           <th style="text-align: center; vertical-align: middle;">Keterangan</th>
+                          <th style="text-align: center; vertical-align: middle;">Aksi</th>
                         </tr>
                       </thead>
                       <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                          <td>{{ booking['id'] }}</td>
+                          <td>{{ booking['time_booking'] }}</td>
+                          <td>{{ booking['car_name'] }}</td>
+                          <td>{{ booking['pic_name'] }}</td>
+                          <td>{{ booking['driver_phone'] }}</td>
+                          <td>{{ booking['start_time'] }}</td>
+                          <td>{{ booking['end_time'] }}</td>
+                          <td>{{ booking['description'] }}</td>
+                          <td>
+                            <!-- Tombol Select -->
+                            <button type="button" class="btn btn-success btn-sm"
+                              onclick="selectBooking({{ booking.id }})">Select</button>
+                            <button class="btn btn-danger btn-sm" data-toggle="modal" data-target="#cancelModal"
+                              data-id="{{ booking['id'] }}">Hapus</button>
+                          </td>
+                        </tr>
+                        {% endfor %}
                       </tbody>
                     </table>
                   </div>
@@ -192,6 +213,7 @@
 
   <!-- Page level custom scripts -->
   <script src="{{ url_for('static', filename='js/demo/datatables-demo.js') }}"></script>
+
   <script>
     // Pratinjau Gambar
     $(document).ready(function () {
@@ -214,6 +236,34 @@
         // Isi nomor telepon driver ke input
         $('#noTelpDriver').val(driverPhone || '');
       });
+    });
+
+    // validasi waktu mulai <= waktu selesai
+    $(document).ready(function () {
+      // Fungsi validasi waktu
+      function validateTime() {
+        const waktuMulaiVal = $('#waktuMulai').val();
+        const waktuSelesaiVal = $('#waktuSelesai').val();
+
+        // Jika salah satu input kosong, jangan lakukan validasi
+        if (!waktuMulaiVal || !waktuSelesaiVal) {
+          return;
+        }
+
+        const waktuMulai = new Date(waktuMulaiVal);
+        const waktuSelesai = new Date(waktuSelesaiVal);
+
+        // Validasi waktu
+        if (waktuMulai >= waktuSelesai) {
+          alert('Waktu mulai harus lebih kecil waktu selesai.');
+          $('#waktuMulai, #waktuSelesai').addClass('is-invalid'); // Tambah tanda kesalahan
+        } else {
+          $('#waktuMulai, #waktuSelesai').removeClass('is-invalid'); // Hapus tanda kesalahan jika valid
+        }
+      }
+
+      // Pantau perubahan pada kedua input
+      $('#waktuMulai, #waktuSelesai').on('change', validateTime);
     });
   </script>
 
