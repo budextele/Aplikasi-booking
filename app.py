@@ -366,6 +366,33 @@ def get_room(room_id):
         return jsonify({'error': 'Ruangan tidak ditemukan'}), 404
 ## Batas akhir Halaman Room Management
 
+# Validasi: Periksa jadwal bentrok dengan booking lain
+def is_schedule_conflicting(conn, car_id, start_time, end_time, booking_id=None):
+    """
+    Memeriksa apakah jadwal baru bentrok dengan jadwal yang sudah ada.
+    Mengembalikan detail booking yang bertabrakan jika ditemukan, atau None jika tidak ada bentrok.
+    """
+    query = """
+        SELECT b.id, b.start_time, b.end_time
+        FROM bookings b
+        WHERE b.item_id = ? AND b.item_type = 'car'
+          AND (
+            (b.start_time < ? AND b.end_time > ?) OR  -- Overlap sebagian
+            (b.start_time >= ? AND b.end_time <= ?) OR  -- Overlap penuh
+            (b.start_time <= ? AND b.end_time >= ?)    -- Overlap luar
+          )
+    """
+    params = (car_id, end_time, start_time, start_time, end_time, start_time, end_time)
+
+    # Jika ini update, abaikan jadwal dengan booking_id yang sama
+    if booking_id:
+        query += " AND b.id != ?"
+        params += (booking_id,)
+
+    conflicting_booking = conn.execute(query, params).fetchone()
+    return conflicting_booking  # Mengembalikan data booking yang bertabrakan (sqlite3.Row) atau None
+
+
 # Halaman Car Booking
 @app.route('/car_booking', methods=['GET', 'POST'])
 def car_booking():
@@ -409,40 +436,17 @@ def car_booking():
         end_time = request.form['waktuSelesai']
         description = request.form.get('description', '')
 
-        # Validasi: Periksa jadwal bentrok dengan booking lain
-        overlapping_booking = conn.execute(
-            """
-            SELECT 
-                id, start_time, end_time 
-            FROM 
-                bookings 
-            WHERE 
-                item_type = 'car' AND 
-                item_id = ? AND 
-                status = 'active' AND 
-                id != ? AND  -- Pastikan tidak memeriksa booking yang sama
-                (
-                    (start_time <= ? AND end_time > ?) OR 
-                    (start_time < ? AND end_time >= ?)
-                )
-            """,
-            (car_id, booking_id, start_time, start_time, end_time, end_time)
-        ).fetchone()
-
-        if overlapping_booking:
-            # Format tanggal dan waktu
-            overlap_start = datetime.strptime(overlapping_booking['start_time'], "%Y-%m-%dT%H:%M").strftime("%d %B %Y, %H:%M")
-            overlap_end = datetime.strptime(overlapping_booking['end_time'], "%Y-%m-%dT%H:%M").strftime("%d %B %Y, %H:%M")
-
-            # Jika ada jadwal bentrok, kembalikan alert ke halaman dengan informasi jadwal bentrok
-            alert_message = f"Jadwal bentrok dengan booking ID {overlapping_booking['id']}: {overlap_start} - {overlap_end}"
+        # Validasi bentrok jadwal
+        conflicting_booking = is_schedule_conflicting(conn, car_id, start_time, end_time, booking_id)
+        if conflicting_booking:  # Jika ada jadwal yang bentrok
+            overlap_start = conflicting_booking['start_time']
+            overlap_end = conflicting_booking['end_time']
+            message = f"Jadwal bentrok dengan booking ID {conflicting_booking['id']}: {overlap_start} - {overlap_end}"
             conn.close()
-            return render_template(
-                'car_booking.html',
-                cars=cars,
-                bookings=bookings,
-                alert=alert_message
-            )
+            return jsonify({
+                'status': 'error',
+                'message': message,
+            }), 400  # HTTP status code 400 untuk error validasi
 
         if booking_id:
             # Update data booking jika bookingId tidak kosong
@@ -484,9 +488,6 @@ def car_booking():
 #cancel booking mobil
 @app.route('/cancel_booking', methods=['POST'])
 def cancel_booking():
-    # data = request.get_json()  # Tangkap data JSON
-    # booking_id = data.get('bookingId')
-    # cancel_reason = data.get('cancelReason')
     booking_id = request.form.get('bookingId')
     cancel_reason = request.form.get('cancelReason')
 
