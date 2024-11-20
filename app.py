@@ -366,7 +366,7 @@ def get_room(room_id):
         return jsonify({'error': 'Ruangan tidak ditemukan'}), 404
 ## Batas akhir Halaman Room Management
 
-# Validasi: Periksa jadwal bentrok dengan booking lain
+# Validasi: Periksa jadwal booking mobil bentrok dengan booking lain
 def is_schedule_conflicting(conn, car_id, start_time, end_time, booking_id=None):
     """
     Memeriksa apakah jadwal baru bentrok dengan jadwal yang sudah ada.
@@ -484,7 +484,6 @@ def car_booking():
     conn.close()
     return render_template('car_booking.html', cars=cars, bookings=bookings)
 
-
 #cancel booking mobil
 @app.route('/cancel_booking', methods=['POST'])
 def cancel_booking():
@@ -541,32 +540,195 @@ def get_booking(booking_id):
     conn.close()
 
     # Debugging: Cetak hasil query
-    if booking:
-        print("Hasil Query:", dict(booking))  # Debugging untuk memastikan hasil query
-        return jsonify({
-            "booking_id": booking['booking_id'],  # ID booking
-            "car_id": booking['car_id'],         # ID mobil
-            "car_name": booking['car_name'],     # Nama mobil
-            "driver_phone": booking['driver_phone'],  # No. telepon driver
-            "pic_name": booking['pic_name'] or '',    # Nama PIC
-            "start_time": booking['start_time'] or '',  # Waktu mulai
-            "end_time": booking['end_time'] or '',      # Waktu selesai
-            "description": booking['description'] or '',  # Keterangan
-            "image_path": booking['image_path'] or '',  # Path gambar
-            "error": None
-        })
-    else:
-        # Jika data booking tidak ditemukan
-        print("Error: Data booking tidak ditemukan untuk ID:", booking_id)  # Debugging
-        return jsonify({'error': 'Data booking tidak ditemukan'}), 404
+    # if booking:
+    #     print("Hasil Query:", dict(booking))  # Debugging untuk memastikan hasil query
+    #     return jsonify({
+    #         "booking_id": booking['booking_id'],  # ID booking
+    #         "car_id": booking['car_id'],         # ID mobil
+    #         "car_name": booking['car_name'],     # Nama mobil
+    #         "driver_phone": booking['driver_phone'],  # No. telepon driver
+    #         "pic_name": booking['pic_name'] or '',    # Nama PIC
+    #         "start_time": booking['start_time'] or '',  # Waktu mulai
+    #         "end_time": booking['end_time'] or '',      # Waktu selesai
+    #         "description": booking['description'] or '',  # Keterangan
+    #         "image_path": booking['image_path'] or '',  # Path gambar
+    #         "error": None
+    #     })
+    # else:
+    #     # Jika data booking tidak ditemukan
+    #     print("Error: Data booking tidak ditemukan untuk ID:", booking_id)  # Debugging
+    #     return jsonify({'error': 'Data booking tidak ditemukan'}), 404
 ## Batas akhir Halaman Car Booking
+
+# Validasi: Periksa jadwal booking ruangan bentrok dengan booking lain
+def is_schedule_conflicting2(conn, room_id, start_time, end_time, booking_id=None):
+    """
+    Memeriksa apakah jadwal baru bentrok dengan jadwal yang sudah ada.
+    Mengembalikan detail booking yang bertabrakan jika ditemukan, atau None jika tidak ada bentrok.
+    """
+    query = """
+        SELECT b.id, b.start_time, b.end_time
+        FROM bookings b
+        WHERE b.item_id = ? AND b.item_type = 'room'
+          AND (
+            (b.start_time < ? AND b.end_time > ?) OR  -- Overlap sebagian
+            (b.start_time >= ? AND b.end_time <= ?) OR  -- Overlap penuh
+            (b.start_time <= ? AND b.end_time >= ?)    -- Overlap luar
+          )
+    """
+    params = (room_id, end_time, start_time, start_time, end_time, start_time, end_time)
+
+    # Jika ini update, abaikan jadwal dengan booking_id yang sama
+    if booking_id:
+        query += " AND b.id != ?"
+        params += (booking_id,)
+
+    conflicting_booking = conn.execute(query, params).fetchone()
+    return conflicting_booking  # Mengembalikan data booking yang bertabrakan (sqlite3.Row) atau None
 
 # Halaman Room Booking
 @app.route('/room_booking/')
 def room_booking():
-    if not session.get('logged_in'):
-        return redirect(url_for('login'))
-    return render_template('room_booking.html', username=session['username'])
+    # if not session.get('logged_in'):
+    #     return redirect(url_for('login'))
+    # return render_template('room_booking.html', username=session['username'])
+    conn = get_db_connection()
+    rooms = conn.execute('SELECT id, name, image_path FROM rooms').fetchall()  # Ambil data ruangan
+
+    # Ambil semua data booking ruangan
+    bookings_raw = conn.execute(
+        """
+        SELECT 
+            b.id, 
+            b.time_booking, 
+            r.name AS room_name, 
+            b.pic_name,  
+            b.start_time, 
+            b.end_time, 
+            b.description 
+        FROM bookings b
+        JOIN rooms r ON b.item_id = r.id
+        WHERE b.item_type = 'room' AND b.status = 'active'
+        """
+    ).fetchall()
+
+    # Konversi data menjadi list of dictionaries dan format waktu
+    bookings = []
+    for row in bookings_raw:
+        booking = dict(row)  # Ubah sqlite3.Row menjadi dictionary
+        booking['time_booking'] = datetime.strptime(booking['time_booking'], "%Y-%m-%d %H:%M:%S").strftime("%d %B %Y, %H:%M")
+        booking['start_time'] = datetime.strptime(booking['start_time'], "%Y-%m-%dT%H:%M").strftime("%d %B %Y, %H:%M")
+        booking['end_time'] = datetime.strptime(booking['end_time'], "%Y-%m-%dT%H:%M").strftime("%d %B %Y, %H:%M")
+        bookings.append(booking)
+
+    # Handle POST request (insert/update booking)
+    if request.method == 'POST':
+        # Ambil data dari form
+        booking_id = request.form.get('bookingId')  # Nilai akan kosong jika data baru
+        room_id = request.form['roomName']
+        pic_name = request.form['namaPIC']
+        start_time = request.form['waktuMulai']
+        end_time = request.form['waktuSelesai']
+        description = request.form.get('description', '')
+
+        # Validasi bentrok jadwal
+        conflicting_booking = is_schedule_conflicting2(conn, room_id, start_time, end_time, booking_id)
+        if conflicting_booking:  # Jika ada jadwal yang bentrok
+            overlap_start = conflicting_booking['start_time']
+            overlap_end = conflicting_booking['end_time']
+            message = f"Jadwal bentrok dengan booking ID {conflicting_booking['id']}: {overlap_start} - {overlap_end}"
+            conn.close()
+            return jsonify({
+                'status': 'error',
+                'message': message,
+            }), 400  # HTTP status code 400 untuk error validasi
+        
+        if booking_id:
+            # Update data booking jika bookingId tidak kosong
+            conn.execute(
+                """
+                UPDATE bookings
+                SET item_id = ?, pic_name = ?, start_time = ?, end_time = ?, description = ?
+                WHERE id = ?
+                """,
+                (room_id, pic_name, start_time, end_time, description, booking_id)
+            )
+            success_message = "Booking berhasil diperbarui."
+        else:
+            # Insert data booking baru jika bookingId kosong
+            conn.execute(
+                """
+                INSERT INTO bookings (item_type, item_id, pic_name, start_time, end_time, description, status)
+                VALUES ('room', ?, ?, ?, ?, ?, 'active')
+                """,
+                (room_id, pic_name, start_time, end_time, description)
+            )
+            success_message = "Booking berhasil disimpan."
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            'status': 'success',
+            'message': success_message,
+        }), 200  # HTTP status code 200 untuk sukses
+    
+    conn.close()
+    return render_template('room_booking.html', rooms=rooms, bookings=bookings)
+
+#cancel booking ruangan
+@app.route('/cancel_booking2', methods=['POST'])
+def cancel_booking2():
+    booking_id = request.form.get('bookingId')
+    cancel_reason = request.form.get('cancelReason')
+
+    # Validasi data
+    if not booking_id or not cancel_reason:
+        return jsonify({"success": False, "message": "ID atau alasan pembatalan tidak valid."}), 400
+
+    # Perbarui status booking menjadi "cancelled" dan tambahkan alasan pembatalan
+    conn = get_db_connection()
+    conn.execute(
+        """
+        UPDATE bookings 
+        SET status = 'cancelled', cancel_reason = ? 
+        WHERE id = ?
+        """,
+        (cancel_reason, booking_id)
+    )
+    conn.commit()
+    conn.close()
+
+    # return jsonify({"success": True, "message": "Pembatalan berhasil dilakukan."})
+    return jsonify({
+        'status': 'success',
+        'message': f'Booking dengan ID {booking_id} berhasil dibatalkan.'
+    })
+
+# Select booking ruangan
+@app.route('/get_booking2/<int:booking_id>', methods=['GET'])
+@login_required
+def get_booking2(booking_id):
+    conn = get_db_connection()
+    # Ambil data booking berdasarkan ID booking
+    booking = conn.execute(
+        '''
+        SELECT 
+            b.id AS booking_id, 
+            r.id AS room_id, 
+            r.name AS room_name,  
+            b.pic_name, 
+            b.start_time, 
+            b.end_time, 
+            b.description, 
+            r.image_path 
+        FROM bookings b
+        JOIN rooms r ON b.item_id = r.id
+        WHERE b.id = ? AND b.item_type = 'room'
+        ''',
+        (booking_id,)
+    ).fetchone()
+    conn.close()
 ## Batas akhir Room Booking
 
 
