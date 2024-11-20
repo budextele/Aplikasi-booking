@@ -539,25 +539,25 @@ def get_booking(booking_id):
     ).fetchone()
     conn.close()
 
-    # Debugging: Cetak hasil query
-    # if booking:
-    #     print("Hasil Query:", dict(booking))  # Debugging untuk memastikan hasil query
-    #     return jsonify({
-    #         "booking_id": booking['booking_id'],  # ID booking
-    #         "car_id": booking['car_id'],         # ID mobil
-    #         "car_name": booking['car_name'],     # Nama mobil
-    #         "driver_phone": booking['driver_phone'],  # No. telepon driver
-    #         "pic_name": booking['pic_name'] or '',    # Nama PIC
-    #         "start_time": booking['start_time'] or '',  # Waktu mulai
-    #         "end_time": booking['end_time'] or '',      # Waktu selesai
-    #         "description": booking['description'] or '',  # Keterangan
-    #         "image_path": booking['image_path'] or '',  # Path gambar
-    #         "error": None
-    #     })
-    # else:
-    #     # Jika data booking tidak ditemukan
-    #     print("Error: Data booking tidak ditemukan untuk ID:", booking_id)  # Debugging
-    #     return jsonify({'error': 'Data booking tidak ditemukan'}), 404
+    #Debugging: Cetak hasil query
+    if booking:
+        # print("Hasil Query:", dict(booking))  # Debugging untuk memastikan hasil query
+        return jsonify({
+            "booking_id": booking['booking_id'],  # ID booking
+            "car_id": booking['car_id'],         # ID mobil
+            "car_name": booking['car_name'],     # Nama mobil
+            "driver_phone": booking['driver_phone'],  # No. telepon driver
+            "pic_name": booking['pic_name'] or '',    # Nama PIC
+            "start_time": booking['start_time'] or '',  # Waktu mulai
+            "end_time": booking['end_time'] or '',      # Waktu selesai
+            "description": booking['description'] or '',  # Keterangan
+            "image_path": booking['image_path'] or '',  # Path gambar
+            "error": None
+        })
+    else:
+        # Jika data booking tidak ditemukan
+        # print("Error: Data booking tidak ditemukan untuk ID:", booking_id)  # Debugging
+        return jsonify({'error': 'Data booking tidak ditemukan'}), 404
 ## Batas akhir Halaman Car Booking
 
 # Validasi: Periksa jadwal booking ruangan bentrok dengan booking lain
@@ -587,7 +587,7 @@ def is_schedule_conflicting2(conn, room_id, start_time, end_time, booking_id=Non
     return conflicting_booking  # Mengembalikan data booking yang bertabrakan (sqlite3.Row) atau None
 
 # Halaman Room Booking
-@app.route('/room_booking/')
+@app.route('/room_booking/', methods=['GET', 'POST'])
 def room_booking():
     # if not session.get('logged_in'):
     #     return redirect(url_for('login'))
@@ -729,6 +729,25 @@ def get_booking2(booking_id):
         (booking_id,)
     ).fetchone()
     conn.close()
+
+    #Debugging: Cetak hasil query
+    if booking:
+        # print("Hasil Query:", dict(booking))  # Debugging untuk memastikan hasil query
+        return jsonify({
+            "booking_id": booking['booking_id'],  # ID booking
+            "room_id": booking['room_id'],         # ID ruangan
+            "room_name": booking['room_name'],     # Nama ruangan
+            "pic_name": booking['pic_name'] or '',    # Nama PIC
+            "start_time": booking['start_time'] or '',  # Waktu mulai
+            "end_time": booking['end_time'] or '',      # Waktu selesai
+            "description": booking['description'] or '',  # Keterangan
+            "image_path": booking['image_path'] or '',  # Path gambar
+            "error": None
+        })
+    else:
+        # Jika data booking tidak ditemukan
+        # print("Error: Data booking tidak ditemukan untuk ID:", booking_id)  # Debugging
+        return jsonify({'error': 'Data booking tidak ditemukan'}), 404
 ## Batas akhir Room Booking
 
 
