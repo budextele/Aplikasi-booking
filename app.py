@@ -832,6 +832,55 @@ def report():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     return render_template('report.html', username=session['username'])
+
+@app.route('/api/reports', methods=['GET'])
+def get_reports():
+    # Ambil parameter dari URL
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    report_type = request.args.get('report_type')
+
+    if not (start_date and end_date and report_type):
+        return jsonify({"error": "Semua parameter harus diisi"}), 400
+
+    try:
+        # Validasi format tanggal
+        start_date = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%d")
+        end_date = datetime.strptime(end_date, "%Y-%m-%d").strftime("%Y-%m-%d")
+    except ValueError:
+        return jsonify({"error": "Format tanggal tidak valid"}), 400
+
+    # Buat query SQL berdasarkan tipe laporan
+    if report_type == 'mobil':
+        query = """
+        SELECT 
+            b.id, b.time_booking, c.name AS car_name, c.driver_phone, b.pic_name,
+            b.start_time, b.end_time, b.status, b.cancel_reason, b.description
+        FROM bookings b
+        JOIN cars c ON b.item_id = c.id
+        WHERE b.item_type = 'car' AND b.start_time BETWEEN ? AND ?
+        """
+    elif report_type == 'ruangan':
+        query = """
+        SELECT 
+            b.id, b.time_booking, r.name AS room_name, b.pic_name,
+            b.start_time, b.end_time, b.status, b.cancel_reason, b.description
+        FROM bookings b
+        JOIN rooms r ON b.item_id = r.id
+        WHERE b.item_type = 'room' AND b.start_time BETWEEN ? AND ?
+        """
+    else:
+        return jsonify({"error": "Tipe laporan tidak valid"}), 400
+
+    # Eksekusi query
+    conn = get_db_connection()
+    cursor = conn.execute(query, (start_date, end_date))
+    data = cursor.fetchall()
+    conn.close()
+
+    # Ubah hasil query ke format JSON
+    result = [dict(row) for row in data]
+    return jsonify(result)
 ## Batas akhir Halaman Report
 
 #......................................................................
