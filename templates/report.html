@@ -85,7 +85,8 @@
               <div class="card-header py-3">
                 <div class="d-flex justify-content-between align-items-center">
                   <h6 class="m-0 font-weight-bold">Laporan Booking Mobil</h6>
-                  <a href="" target="_blank" class="btn btn-danger btn-icon-split btn-sm">
+                  <a href="javascript:void(0);" class="btn btn-danger btn-icon-split btn-sm"
+                    id="downloadCarReportButton">
                     <span class="icon text-white-50">
                       <i class="fas fa-download"></i>
                     </span>
@@ -124,7 +125,8 @@
               <div class="card-header py-3">
                 <div class="d-flex justify-content-between align-items-center">
                   <h6 class="m-0 font-weight-bold">Laporan Booking Ruangan</h6>
-                  <a href="" target="_blank" class="btn btn-danger btn-icon-split btn-sm">
+                  <a href="javascript:void(0);" class="btn btn-danger btn-icon-split btn-sm"
+                    id="downloadRoomReportButton">
                     <span class="icon text-white-50">
                       <i class="fas fa-download"></i>
                     </span>
@@ -193,6 +195,9 @@
 
   <!-- Page level custom scripts -->
   <script src="{{ url_for('static', filename='js/demo/datatables-demo.js') }}"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.5/xlsx.full.min.js"></script>
+
 
   <script>
     // Fungsi untuk memformat waktu ke "YYYY-MM-DD HH:mm"
@@ -315,6 +320,97 @@
           console.error('Error fetching data:', error);
           alert('Gagal memuat data. Silakan coba lagi.');
         });
+    });
+
+    //download laporan
+    // document.getElementById('downloadReportButton').addEventListener('click', function () {
+    //   const reportType = document.getElementById('report_type').value;
+
+    //   let table;
+    //   if (reportType === 'mobil') {
+    //     table = document.getElementById('dataTableMobil');
+    //   } else if (reportType === 'ruangan') {
+    //     table = document.getElementById('dataTableRoom');
+    //   }
+
+    //   // Validasi apakah tabel ditemukan
+    //   if (!table || table.style.display === 'none') {
+    //     alert('Tidak ada data yang dapat diunduh untuk jenis laporan ini.');
+    //     return;
+    //   }
+
+    //   try {
+    //     // Buat workbook dari tabel
+    //     const wb = XLSX.utils.table_to_book(table, {
+    //       sheet: 'Laporan'
+    //     });
+
+    //     // Menentukan nama file berdasarkan jenis laporan
+    //     const fileName = reportType === 'mobil' ? 'report_booking_mobil.xlsx' : 'report_booking_ruangan.xlsx';
+
+    //     // Unduh file Excel
+    //     XLSX.writeFile(wb, fileName);
+    //     alert(`Laporan ${reportType === 'mobil' ? 'mobil' : 'ruangan'} berhasil diunduh.`);
+    //   } catch (error) {
+    //     console.error('Error saat mengunduh laporan:', error);
+    //     alert('Terjadi kesalahan saat mengunduh laporan.');
+    //   }
+    // });
+
+    // Download laporan booking mobil
+    document.getElementById('downloadCarReportButton').addEventListener('click', function () {
+      const table = document.getElementById('dataTableMobil');
+
+      // Validasi apakah tabel mobil ditemukan dan terlihat
+      if (!table || table.style.display === 'none') {
+        alert('Tidak ada data booking mobil yang dapat diunduh.');
+        return;
+      }
+
+      try {
+        // Buat workbook dari tabel mobil
+        const wb = XLSX.utils.table_to_book(table, {
+          sheet: 'Laporan Mobil'
+        });
+
+        // Tentukan nama file untuk laporan mobil
+        const fileName = 'report_booking_mobil.xlsx';
+
+        // Unduh file Excel
+        XLSX.writeFile(wb, fileName);
+        alert('Laporan booking mobil berhasil diunduh.');
+      } catch (error) {
+        console.error('Error saat mengunduh laporan mobil:', error);
+        alert('Terjadi kesalahan saat mengunduh laporan booking mobil.');
+      }
+    });
+
+    // Download laporan booking ruangan
+    document.getElementById('downloadRoomReportButton').addEventListener('click', function () {
+      const table = document.getElementById('dataTableRoom');
+
+      // Validasi apakah tabel ruangan ditemukan dan terlihat
+      if (!table || table.style.display === 'none') {
+        alert('Tidak ada data booking ruangan yang dapat diunduh.');
+        return;
+      }
+
+      try {
+        // Buat workbook dari tabel ruangan
+        const wb = XLSX.utils.table_to_book(table, {
+          sheet: 'Laporan Ruangan'
+        });
+
+        // Tentukan nama file untuk laporan ruangan
+        const fileName = 'report_booking_ruangan.xlsx';
+
+        // Unduh file Excel
+        XLSX.writeFile(wb, fileName);
+        alert('Laporan booking ruangan berhasil diunduh.');
+      } catch (error) {
+        console.error('Error saat mengunduh laporan ruangan:', error);
+        alert('Terjadi kesalahan saat mengunduh laporan booking ruangan.');
+      }
     });
   </script>
 </body>
