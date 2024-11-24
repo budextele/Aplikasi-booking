@@ -72,6 +72,81 @@ def dashboard():
     if not session.get('logged_in'):
         return redirect(url_for('login'))
     return render_template('dashboard.html', username=session['username'])
+
+@app.route('/api/active_bookings', methods=['GET'])
+@login_required
+def active_bookings():
+    conn = get_db_connection()
+    today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    # Query untuk booking ruangan yang masih aktif
+    room_bookings = conn.execute('''
+        SELECT 
+            b.id AS booking_id,
+            r.name AS room_name,
+            b.pic_name,
+            b.start_time,
+            b.end_time,
+            b.description,
+            b.time_booking
+        FROM bookings b
+        JOIN rooms r ON b.item_id = r.id
+        WHERE b.item_type = 'room' AND b.end_time >= ? AND b.status = 'active'
+    ''', (today,)).fetchall()
+    
+    # Query untuk booking mobil yang masih aktif
+    car_bookings = conn.execute('''
+        SELECT 
+            b.id AS booking_id,
+            c.name AS car_name,
+            c.driver_phone,
+            b.pic_name,
+            b.start_time,
+            b.end_time,
+            b.description,
+            b.time_booking
+        FROM bookings b
+        JOIN cars c ON b.item_id = c.id
+        WHERE b.item_type = 'car' AND b.end_time >= ? AND b.status = 'active'
+    ''', (today,)).fetchall()
+    
+    conn.close()
+
+    # Format data untuk dikirim ke frontend
+    room_data = [dict(row) for row in room_bookings]
+    car_data = [dict(row) for row in car_bookings]
+
+    return jsonify({
+        'rooms': room_data,
+        'cars': car_data
+    })
+
+@app.route('/api/active_booking_count', methods=['GET'])
+@login_required
+def active_booking_count():
+    conn = get_db_connection()
+    today = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    # Hitung jumlah booking ruangan aktif
+    active_rooms_count = conn.execute('''
+        SELECT COUNT(*) AS count
+        FROM bookings
+        WHERE item_type = 'room' AND end_time >= ? AND status = 'active'
+    ''', (today,)).fetchone()['count']
+    
+    # Hitung jumlah booking mobil aktif
+    active_cars_count = conn.execute('''
+        SELECT COUNT(*) AS count
+        FROM bookings
+        WHERE item_type = 'car' AND end_time >= ? AND status = 'active'
+    ''', (today,)).fetchone()['count']
+    
+    conn.close()
+    return jsonify({
+        'active_rooms_count': active_rooms_count,
+        'active_cars_count': active_cars_count
+    })
+
 ## Batas Akhir Halaman Dashboard
 
 # Halaman Car Management
