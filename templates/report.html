@@ -177,57 +177,6 @@
     <i class="fas fa-angle-up"></i>
   </a>
 
-
-  <!-- <script>
-    document.getElementById('searchButton').addEventListener('click', function () {
-      const startDate = document.getElementById('start_date').value;
-      const endDate = document.getElementById('end_date').value;
-      const reportType = document.getElementById('report_type').value;
-
-      // Validasi input
-      if (!startDate || !endDate || !reportType) {
-        alert('Silakan isi semua kolom filter terlebih dahulu.');
-        return;
-      }
-
-      // Reset tampilan tabel
-      document.getElementById('mobilTable').style.display = 'none';
-      document.getElementById('roomTable').style.display = 'none';
-
-      // Tampilkan tabel sesuai dengan jenis laporan
-      if (reportType === 'mobil') {
-        document.getElementById('mobilTable').style.display = 'block';
-        // Inisialisasi DataTables untuk Booking Mobil
-        if (!$.fn.DataTable.isDataTable('#dataTableMobil')) {
-          $('#dataTableMobil').DataTable({
-            "language": {
-              "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/Indonesian.json"
-            },
-            "paging": true,
-            "searching": false,
-            "info": true,
-            "lengthChange": true,
-          });
-        }
-      } else if (reportType === 'ruangan') {
-        document.getElementById('roomTable').style.display = 'block';
-        // Inisialisasi DataTables untuk Booking Ruangan
-        if (!$.fn.DataTable.isDataTable('#dataTableRoom')) {
-          $('#dataTableRoom').DataTable({
-            "language": {
-              // "url": "//cdn.datatables.net/plug-ins/1.13.4/i18n/Indonesian.json"
-              "url": "#"
-            },
-            "paging": true,
-            "searching": false,
-            "info": true,
-            "lengthChange": true,
-          });
-        }
-      }
-    });
-  </script> -->
-
   <!-- Bootstrap core JavaScript-->
   <script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js') }}"></script>
   <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
@@ -246,6 +195,18 @@
   <script src="{{ url_for('static', filename='js/demo/datatables-demo.js') }}"></script>
 
   <script>
+    // Fungsi untuk memformat waktu ke "YYYY-MM-DD HH:mm"
+    function formatDateTime(isoDateTime) {
+      const date = new Date(isoDateTime);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Bulan dimulai dari 0
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
+    }
+
+    //get value
     document.getElementById('searchButton').addEventListener('click', function () {
       const startDate = document.getElementById('start_date').value;
       const endDate = document.getElementById('end_date').value;
@@ -282,8 +243,8 @@
                 <td>${booking.car_name || '-'}</td>
                 <td>${booking.driver_phone || '-'}</td>
                 <td>${booking.pic_name || '-'}</td>
-                <td>${booking.start_time || '-'}</td>
-                <td>${booking.end_time || '-'}</td>
+                <td>${formatDateTime(booking.start_time) || '-'}</td>
+                <td>${formatDateTime(booking.end_time) || '-'}</td>
                 <td>${booking.status || '-'}</td>
                 <td>${booking.cancel_reason || '-'}</td>
                 <td>${booking.description || '-'}</td>
@@ -323,8 +284,8 @@
                 <td>${booking.time_booking || '-'}</td>
                 <td>${booking.room_name || '-'}</td>
                 <td>${booking.pic_name || '-'}</td>
-                <td>${booking.start_time || '-'}</td>
-                <td>${booking.end_time || '-'}</td>
+                <td>${formatDateTime(booking.start_time) || '-'}</td>
+                <td>${formatDateTime(booking.end_time) || '-'}</td>
                 <td>${booking.status || '-'}</td>
                 <td>${booking.cancel_reason || '-'}</td>
                 <td>${booking.description || '-'}</td>
