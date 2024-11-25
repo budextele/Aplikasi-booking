@@ -10,6 +10,10 @@ app = Flask(__name__)
 app.secret_key = 'secret_key'  # Ganti dengan secret key yang lebih aman
 DATABASE = 'instance/database.db'
 
+#code trial
+TRIAL_END_DATE = datetime.strptime('30/11/2024', '%d/%m/%Y')  # Tanggal akhir trial
+#end code trial
+
 # Fungsi untuk koneksi database
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
@@ -22,6 +26,13 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if not session.get('logged_in'):  # Cek apakah sesi login ada
             return redirect(url_for('login'))  # Redirect ke halaman login jika belum login
+        
+        #code trial
+        if datetime.now() > TRIAL_END_DATE:
+            session.clear()  # Hapus semua data sesi
+            return redirect(url_for('login', error='Masa trial berakhir.'))
+        #end code trial
+        
         return f(*args, **kwargs)
     return decorated_function
 
@@ -39,6 +50,13 @@ def allowed_file(filename):
 @app.route('/', methods=['GET', 'POST'])
 def login():
     error = None  # Variabel untuk menyimpan pesan kesalahan
+
+    #code trial
+    if datetime.now() > TRIAL_END_DATE:
+        error = 'Masa trial berakhir.'
+        return render_template('login.html', error=error)
+    #end code trial
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
