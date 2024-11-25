@@ -8,7 +8,8 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = 'secret_key'  # Ganti dengan secret key yang lebih aman
-DATABASE = 'instance/database.db'
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))  # Lokasi file `app.py` atau `.exe`
+DATABASE = os.path.join(BASE_DIR, 'instance', 'database.db')  # Gabungkan jalur absolut ke database
 
 #code trial
 TRIAL_END_DATE = datetime.strptime('30/11/2024', '%d/%m/%Y')  # Tanggal akhir trial
@@ -36,7 +37,8 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-UPLOAD_FOLDER = 'static/picture'
+# UPLOAD_FOLDER = 'static/picture'
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'picture') 
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
