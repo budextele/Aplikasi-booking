@@ -235,7 +235,7 @@ def car_management():
             image_path = None
             if car_image and allowed_file(car_image.filename):
                 cur = conn.execute(
-                    'INSERT INTO cars (name, driver_phone, description, image_path) VALUES (?, ?, ?, ?)',
+                    'INSERT INTO cars (name, driver_phone, description, image_path, status) VALUES (?, ?, ?, ?, "active")',
                     (car_name, driver_phone, description, None)
                 )
                 car_id = cur.lastrowid
@@ -264,7 +264,7 @@ def car_management():
 
     # Ambil data mobil untuk ditampilkan di tabel
     conn = get_db_connection()
-    cars = conn.execute('SELECT * FROM cars').fetchall()
+    cars = conn.execute('SELECT * FROM cars WHERE status = "active"').fetchall()
     conn.close()
 
     return render_template('car_management.html', cars=cars, username=session['username'])
@@ -287,7 +287,7 @@ def delete_car(car_id):
             os.remove(full_image_path)
 
     # Hapus data mobil dari database
-    conn.execute('DELETE FROM cars WHERE id = ?', (car_id,))
+    conn.execute('UPDATE cars SET status = "deleted" WHERE id = ?', (car_id,))
     conn.commit()
     conn.close()
     return redirect(url_for('car_management'))
@@ -381,7 +381,7 @@ def room_management():
             image_path = None
             if room_image and allowed_file(room_image.filename):
                 cur = conn.execute(
-                    'INSERT INTO rooms (name, description, image_path) VALUES (?, ?, ?)',
+                    'INSERT INTO rooms (name, description, image_path, status) VALUES (?, ?, ?, "active")',
                     (room_name, description, None)
                 )
                 room_id = cur.lastrowid
@@ -410,7 +410,7 @@ def room_management():
 
     # Ambil data ruangan untuk ditampilkan di tabel
     conn = get_db_connection()
-    rooms = conn.execute('SELECT * FROM rooms').fetchall()
+    rooms = conn.execute('SELECT * FROM rooms WHERE status = "active"').fetchall()
     conn.close()
 
     return render_template('room_management.html', rooms=rooms, username=session['username'])
@@ -433,7 +433,7 @@ def delete_room(room_id):
             os.remove(full_image_path)
 
     # Hapus data ruangan dari database
-    conn.execute('DELETE FROM rooms WHERE id = ?', (room_id,))
+    conn.execute('UPDATE rooms SET status = "deleted" WHERE id = ?', (room_id,))
     conn.commit()
     conn.close()
     return redirect(url_for('room_management'))
@@ -490,7 +490,7 @@ def is_schedule_conflicting(conn, car_id, start_time, end_time, booking_id=None)
 @app.route('/car_booking', methods=['GET', 'POST'])
 def car_booking():
     conn = get_db_connection()
-    cars = conn.execute('SELECT id, name, driver_phone, image_path FROM cars').fetchall()  # Ambil data mobil
+    cars = conn.execute('SELECT id, name, driver_phone, image_path FROM cars WHERE status = "active"').fetchall()  # Ambil data mobil
 
     # Ambil semua data booking mobil
     bookings_raw = conn.execute(
@@ -686,7 +686,7 @@ def room_booking():
     #     return redirect(url_for('login'))
     # return render_template('room_booking.html', username=session['username'])
     conn = get_db_connection()
-    rooms = conn.execute('SELECT id, name, image_path FROM rooms').fetchall()  # Ambil data ruangan
+    rooms = conn.execute('SELECT id, name, image_path FROM rooms WHERE status = "active"').fetchall()  # Ambil data ruangan
 
     # Ambil semua data booking ruangan
     bookings_raw = conn.execute(
