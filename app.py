@@ -12,7 +12,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))  # Lokasi file `app.py` at
 DATABASE = os.path.join(BASE_DIR, 'instance', 'database.db')  # Gabungkan jalur absolut ke database
 
 #code trial
-TRIAL_END_DATE = datetime.strptime('30/11/2024', '%d/%m/%Y')  # Tanggal akhir trial
+# TRIAL_END_DATE = datetime.strptime('30/11/2024', '%d/%m/%Y')  # Tanggal akhir trial
 #end code trial
 
 # Fungsi untuk koneksi database
@@ -29,9 +29,9 @@ def login_required(f):
             return redirect(url_for('login'))  # Redirect ke halaman login jika belum login
         
         #code trial
-        if datetime.now() > TRIAL_END_DATE:
-            session.clear()  # Hapus semua data sesi
-            return redirect(url_for('login', error='Masa trial berakhir.'))
+        # if datetime.now() > TRIAL_END_DATE:
+        #     session.clear()  # Hapus semua data sesi
+        #     return redirect(url_for('login', error='Masa trial berakhir.'))
         #end code trial
         
         return f(*args, **kwargs)
@@ -54,9 +54,9 @@ def login():
     error = None  # Variabel untuk menyimpan pesan kesalahan
 
     #code trial
-    if datetime.now() > TRIAL_END_DATE:
-        error = 'Masa trial berakhir.'
-        return render_template('login.html', error=error)
+    # if datetime.now() > TRIAL_END_DATE:
+    #     error = 'Masa trial berakhir.'
+    #     return render_template('login.html', error=error)
     #end code trial
 
     if request.method == 'POST':
@@ -914,4 +914,5 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
