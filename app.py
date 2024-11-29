@@ -865,38 +865,54 @@ def get_reports():
 
     try:
         # Validasi format tanggal
-        start_date = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%d")
-        end_date = datetime.strptime(end_date, "%Y-%m-%d").strftime("%Y-%m-%d")
+        start_of_day = f"{start_date} 00:00:00"
+        end_of_day = f"{end_date} 23:59:59"
+        datetime.strptime(start_of_day, "%Y-%m-%d %H:%M:%S")
+        datetime.strptime(end_of_day, "%Y-%m-%d %H:%M:%S")
     except ValueError:
         return jsonify({"error": "Format tanggal tidak valid"}), 400
 
     # Buat query SQL berdasarkan tipe laporan
     if report_type == 'mobil':
-        query = """
+        query = f"""
         SELECT 
             b.id, b.time_booking, c.name AS car_name, c.driver_phone, b.pic_name,
             b.start_time, b.end_time, b.status, b.cancel_reason, b.description
         FROM bookings b
         JOIN cars c ON b.item_id = c.id
-        WHERE b.item_type = 'car' AND b.start_time BETWEEN ? AND ?
+        WHERE b.item_type = 'car' AND (
+            (DATETIME(b.start_time) BETWEEN ? AND ?) OR
+            (DATETIME(b.end_time) BETWEEN ? AND ?) OR
+            (DATETIME(b.start_time) <= ? AND DATETIME(b.end_time) >= ?)
+        )
         """
     elif report_type == 'ruangan':
-        query = """
+        query = f"""
         SELECT 
             b.id, b.time_booking, r.name AS room_name, b.pic_name,
             b.start_time, b.end_time, b.status, b.cancel_reason, b.description
         FROM bookings b
         JOIN rooms r ON b.item_id = r.id
-        WHERE b.item_type = 'room' AND b.start_time BETWEEN ? AND ?
+        WHERE b.item_type = 'room' AND (
+            (DATETIME(b.start_time) BETWEEN ? AND ?) OR
+            (DATETIME(b.end_time) BETWEEN ? AND ?) OR
+            (DATETIME(b.start_time) <= ? AND DATETIME(b.end_time) >= ?)
+        )
         """
     else:
         return jsonify({"error": "Tipe laporan tidak valid"}), 400
 
+    params = [start_of_day, end_of_day, start_of_day, end_of_day, start_of_day, end_of_day]
+
     # Eksekusi query
-    conn = get_db_connection()
-    cursor = conn.execute(query, (start_date, end_date))
-    data = cursor.fetchall()
-    conn.close()
+    try:
+        conn = get_db_connection()
+        cursor = conn.execute(query, params)
+        data = cursor.fetchall()
+    except sqlite3.Error as e:
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
+    finally:
+        conn.close()
 
     # Ubah hasil query ke format JSON
     result = [dict(row) for row in data]
