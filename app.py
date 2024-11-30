@@ -508,10 +508,13 @@ def car_booking():
             c.driver_phone, 
             b.start_time, 
             b.end_time, 
-            b.description 
+            b.description, 
+            bl.label AS booking_label
         FROM bookings b
         JOIN cars c ON b.item_id = c.id
-        WHERE b.item_type = 'car' AND b.status = 'active'
+        LEFT JOIN bookings_label bl ON b.booking_type = bl.id
+        WHERE b.item_type = 'car' 
+        AND b.status = 'active';
         """
     ).fetchall()
 
@@ -530,6 +533,7 @@ def car_booking():
         booking_id = request.form.get('bookingId')  # Nilai akan kosong jika data baru
         car_id = request.form['carName']
         pic_name = request.form['namaPIC']
+        booking_type_id = request.form['bookingType']
         start_time = request.form['waktuMulai']
         end_time = request.form['waktuSelesai']
         description = request.form.get('description', '')
@@ -551,20 +555,20 @@ def car_booking():
             conn.execute(
                 """
                 UPDATE bookings
-                SET item_id = ?, pic_name = ?, start_time = ?, end_time = ?, description = ?
+                SET item_id = ?, pic_name = ?, start_time = ?, end_time = ?, description = ?, booking_type = ?
                 WHERE id = ?
                 """,
-                (car_id, pic_name, start_time, end_time, description, booking_id)
+                (car_id, pic_name, start_time, end_time, description, booking_type_id, booking_id)
             )
             success_message = "Booking berhasil diperbarui."
         else:
             # Insert data booking baru jika bookingId kosong
             conn.execute(
                 """
-                INSERT INTO bookings (item_type, item_id, pic_name, start_time, end_time, description, status)
-                VALUES ('car', ?, ?, ?, ?, ?, 'active')
+                INSERT INTO bookings (item_type, item_id, pic_name, start_time, end_time, description, booking_type, status)
+                VALUES ('car', ?, ?, ?, ?, ?, ?, 'active')
                 """,
-                (car_id, pic_name, start_time, end_time, description)
+                (car_id, pic_name, start_time, end_time, description, booking_type_id)
             )
             success_message = "Booking berhasil disimpan."
 
@@ -628,10 +632,14 @@ def get_booking(booking_id):
             b.start_time, 
             b.end_time, 
             b.description, 
-            c.image_path 
+            c.image_path,
+            bl.id AS booking_label_id, 
+            bl.label AS booking_label
         FROM bookings b
         JOIN cars c ON b.item_id = c.id
-        WHERE b.id = ? AND b.item_type = 'car'
+        LEFT JOIN bookings_label bl ON b.booking_type = bl.id
+        WHERE b.id = ? 
+        AND b.item_type = 'car'
         ''',
         (booking_id,)
     ).fetchone()
@@ -650,6 +658,8 @@ def get_booking(booking_id):
             "end_time": booking['end_time'] or '',      # Waktu selesai
             "description": booking['description'] or '',  # Keterangan
             "image_path": booking['image_path'] or '',  # Path gambar
+            "booking_label_id": booking['booking_label_id'] or '', #id booking labels
+            "booking_label": booking['booking_label'] or '', #label
             "error": None
         })
     else:

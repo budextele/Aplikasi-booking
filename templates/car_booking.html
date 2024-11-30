@@ -163,6 +163,7 @@
                           <th style="text-align: center; vertical-align: middle;">Waktu Mulai</th>
                           <th style="text-align: center; vertical-align: middle;">Waktu Selesai</th>
                           <th style="text-align: center; vertical-align: middle;">Keterangan</th>
+                          <th style="text-align: center; vertical-align: middle;">Tipe Booking</th>
                           <th style="text-align: center; vertical-align: middle;">Aksi</th>
                         </tr>
                       </thead>
@@ -177,6 +178,13 @@
                           <td>{{ booking['start_time'] }}</td>
                           <td>{{ booking['end_time'] }}</td>
                           <td>{{ booking['description'] }}</td>
+                          <td class="font-weight-bold
+                              {% if booking['booking_label'] == 'Priority' %}text-danger
+                              {% elif booking['booking_label'] == 'To Costumer' %}text-primary
+                              {% elif booking['booking_label'] == 'Non-Priority' %}text-dark
+                              {% else %}text-muted{% endif %}">
+                            {{ booking['booking_label'] }}
+                          </td>
                           <td>
                             <!-- Tombol Select -->
                             <button type="button" class="btn btn-success btn-sm"
@@ -442,6 +450,7 @@
             document.getElementById('carName').value = data.car_id; // ID mobil
             document.getElementById('noTelpDriver').value = data.driver_phone; // Nomor telepon driver
             document.getElementById('namaPIC').value = data.pic_name; // Nama PIC
+            document.getElementById('bookingType').value = data.booking_label_id;
             document.getElementById('waktuMulai').value = data.start_time; // Waktu mulai booking
             document.getElementById('waktuSelesai').value = data.end_time; // Waktu selesai booking
             document.getElementById('description').value = data.description; // Keterangan booking
@@ -467,6 +476,9 @@
               previewImage.src = carImage;
             }
 
+            // Panggil fungsi untuk memperbarui warna pada bookingType
+            const bookingTypeSelect = document.getElementById('bookingType');
+            updateSelectColor(bookingTypeSelect);
           }
         })
         .catch(error => {
