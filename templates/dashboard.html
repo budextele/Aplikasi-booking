@@ -120,6 +120,7 @@
                       <th>Waktu Mulai Booking</th>
                       <th>Waktu Selesai Booking</th>
                       <th>Keterangan</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -149,6 +150,7 @@
                       <th>Waktu Mulai Booking</th>
                       <th>Waktu Selesai Booking</th>
                       <th>Keterangan</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -219,6 +221,9 @@
           const roomTableBody = document.querySelector("#roomTable tbody");
           roomTableBody.innerHTML = ""; // Kosongkan tabel sebelumnya
           data.rooms.forEach(booking => {
+            // Tentukan kelas untuk kolom status secara spesifik
+            const statusClass = booking.status === 'active' ? 'text-success' :
+              ''; // Warna hijau untuk "active"
             const row = `
           <tr>
             <td>${booking.time_booking || '-'}</td>
@@ -227,6 +232,7 @@
             <td>${formatDateTime(booking.start_time)}</td>
             <td>${formatDateTime(booking.end_time)}</td>
             <td>${booking.description || '-'}</td>
+            <td class="font-weight-bold text-uppercase ${statusClass}">${booking.status || '-'}</td>
           </tr>
         `;
             roomTableBody.innerHTML += row;
@@ -236,6 +242,9 @@
           const carTableBody = document.querySelector("#carTable tbody");
           carTableBody.innerHTML = ""; // Kosongkan tabel sebelumnya
           data.cars.forEach(booking => {
+            // Tentukan kelas untuk kolom status secara spesifik
+            const statusClass = booking.status === 'active' ? 'text-success' :
+              ''; // Warna hijau untuk "active"
             const row = `
           <tr>
             <td>${booking.time_booking || '-'}</td>
@@ -245,6 +254,7 @@
             <td>${formatDateTime(booking.start_time)}</td>
             <td>${formatDateTime(booking.end_time)}</td>
             <td>${booking.description || '-'}</td>
+            <td class="font-weight-bold text-uppercase ${statusClass}">${booking.status || '-'}</td>
           </tr>
         `;
             carTableBody.innerHTML += row;

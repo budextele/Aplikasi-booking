@@ -108,7 +108,8 @@ def active_bookings():
             b.start_time,
             b.end_time,
             b.description,
-            b.time_booking
+            b.time_booking,
+            b.status
         FROM bookings b
         JOIN rooms r ON b.item_id = r.id
         WHERE b.item_type = 'room' AND b.end_time >= ? AND b.status = 'active'
@@ -124,7 +125,8 @@ def active_bookings():
             b.start_time,
             b.end_time,
             b.description,
-            b.time_booking
+            b.time_booking,
+            b.status
         FROM bookings b
         JOIN cars c ON b.item_id = c.id
         WHERE b.item_type = 'car' AND b.end_time >= ? AND b.status = 'active'
