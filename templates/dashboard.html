@@ -150,6 +150,7 @@
                       <th>Waktu Mulai Booking</th>
                       <th>Waktu Selesai Booking</th>
                       <th>Keterangan</th>
+                      <th>Tipe Booking</th>
                       <th>Status</th>
                     </tr>
                   </thead>
@@ -245,6 +246,15 @@
             // Tentukan kelas untuk kolom status secara spesifik
             const statusClass = booking.status === 'active' ? 'text-success' :
               ''; // Warna hijau untuk "active"
+            // Tentukan kelas untuk kolom booking_label berdasarkan nilainya
+            let bookingLabelClass = '';
+            if (booking.booking_label === 'Priority') {
+              bookingLabelClass = 'text-danger'; // Merah untuk "Priority"
+            } else if (booking.booking_label === 'To Costumer') {
+              bookingLabelClass = 'text-primary'; // Biru untuk "To Costumer"
+            } else if (booking.booking_label === 'Non-Priority') {
+              bookingLabelClass = 'text-dark'; // Hitam untuk "Non-Priority"
+            }
             const row = `
           <tr>
             <td>${booking.time_booking || '-'}</td>
@@ -254,6 +264,7 @@
             <td>${formatDateTime(booking.start_time)}</td>
             <td>${formatDateTime(booking.end_time)}</td>
             <td>${booking.description || '-'}</td>
+            <td class="font-weight-bold ${bookingLabelClass}">${booking.booking_label}</td>
             <td class="font-weight-bold text-uppercase ${statusClass}">${booking.status || '-'}</td>
           </tr>
         `;

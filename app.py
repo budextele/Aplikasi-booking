@@ -126,9 +126,11 @@ def active_bookings():
             b.end_time,
             b.description,
             b.time_booking,
-            b.status
+            b.status,
+            bl.label AS booking_label
         FROM bookings b
         JOIN cars c ON b.item_id = c.id
+        LEFT JOIN bookings_label bl ON b.booking_type = bl.id
         WHERE b.item_type = 'car' AND b.end_time >= ? AND b.status = 'active'
     ''', (today,)).fetchall()
     
