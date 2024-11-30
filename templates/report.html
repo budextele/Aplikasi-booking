@@ -346,41 +346,6 @@
         });
     });
 
-    //download laporan
-    // document.getElementById('downloadReportButton').addEventListener('click', function () {
-    //   const reportType = document.getElementById('report_type').value;
-
-    //   let table;
-    //   if (reportType === 'mobil') {
-    //     table = document.getElementById('dataTableMobil');
-    //   } else if (reportType === 'ruangan') {
-    //     table = document.getElementById('dataTableRoom');
-    //   }
-
-    //   // Validasi apakah tabel ditemukan
-    //   if (!table || table.style.display === 'none') {
-    //     alert('Tidak ada data yang dapat diunduh untuk jenis laporan ini.');
-    //     return;
-    //   }
-
-    //   try {
-    //     // Buat workbook dari tabel
-    //     const wb = XLSX.utils.table_to_book(table, {
-    //       sheet: 'Laporan'
-    //     });
-
-    //     // Menentukan nama file berdasarkan jenis laporan
-    //     const fileName = reportType === 'mobil' ? 'report_booking_mobil.xlsx' : 'report_booking_ruangan.xlsx';
-
-    //     // Unduh file Excel
-    //     XLSX.writeFile(wb, fileName);
-    //     alert(`Laporan ${reportType === 'mobil' ? 'mobil' : 'ruangan'} berhasil diunduh.`);
-    //   } catch (error) {
-    //     console.error('Error saat mengunduh laporan:', error);
-    //     alert('Terjadi kesalahan saat mengunduh laporan.');
-    //   }
-    // });
-
     // Download laporan booking mobil
     document.getElementById('downloadCarReportButton').addEventListener('click', function () {
       const table = document.getElementById('dataTableMobil');
