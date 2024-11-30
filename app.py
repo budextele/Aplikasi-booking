@@ -495,6 +495,7 @@ def is_schedule_conflicting(conn, car_id, start_time, end_time, booking_id=None)
 def car_booking():
     conn = get_db_connection()
     cars = conn.execute('SELECT id, name, driver_phone, image_path FROM cars WHERE status = "active"').fetchall()  # Ambil data mobil
+    bookings_label = conn.execute('SELECT id, label FROM bookings_label').fetchall()  # Ambil data bookings label
 
     # Ambil semua data booking mobil
     bookings_raw = conn.execute(
@@ -579,7 +580,7 @@ def car_booking():
         }), 200  # HTTP status code 200 untuk sukses
 
     conn.close()
-    return render_template('car_booking.html', cars=cars, bookings=bookings)
+    return render_template('car_booking.html', cars=cars, bookings=bookings, bookings_label=bookings_label)
 
 #cancel booking mobil
 @app.route('/cancel_booking', methods=['POST'])

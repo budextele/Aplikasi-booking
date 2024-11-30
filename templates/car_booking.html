@@ -95,6 +95,23 @@
                           <input type="text" class="form-control" id="namaPIC" name="namaPIC" required>
                         </div>
                         <div class="form-group">
+                          <label for="bookingType">Tipe Booking :</label>
+                          <select class="form-control" id="bookingType" name="bookingType" required
+                            onchange="updateSelectColor(this)">
+                            <option value="" disabled selected style="font-weight: normal;">Silahkan Pilih!</option>
+                            {% for booking_label in bookings_label %}
+                            <option value="{{ booking_label['id'] }}" style="
+                                  font-weight: bold;
+                                  color: {% if booking_label['id'] == 1 %}red
+                                        {% elif booking_label['id'] == 2 %}blue
+                                        {% elif booking_label['id'] == 3 %}black
+                                        {% else %}inherit{% endif %};">
+                              {{ booking_label['label'] }}
+                            </option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                        <div class="form-group">
                           <label for="waktuMulai">Waktu Mulai :</label>
                           <input type="datetime-local" class="form-control" id="waktuMulai" name="waktuMulai" required>
                         </div>
@@ -456,6 +473,19 @@
           console.error('Error:', error);
           alert('Terjadi kesalahan saat mengambil data booking: ' + error.message); // Tampilkan error pesan
         });
+    }
+
+    function updateSelectColor(selectElement) {
+      if (selectElement.id === 'bookingType') {
+        // Ambil opsi yang dipilih
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        const selectedColor = selectedOption.style.color;
+        const selectedWeight = selectedOption.style.fontWeight;
+
+        // Terapkan warna dan font weight ke elemen <select>
+        selectElement.style.color = selectedColor;
+        selectElement.style.fontWeight = selectedWeight;
+      }
     }
   </script>
 
