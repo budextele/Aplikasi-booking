@@ -890,9 +890,10 @@ def get_reports():
         query = f"""
         SELECT 
             b.id, b.time_booking, c.name AS car_name, c.driver_phone, b.pic_name,
-            b.start_time, b.end_time, b.status, b.cancel_reason, b.description
+            b.start_time, b.end_time, b.status, b.cancel_reason, b.description, bl.label AS booking_label
         FROM bookings b
         JOIN cars c ON b.item_id = c.id
+        LEFT JOIN bookings_label bl ON b.booking_type = bl.id
         WHERE b.item_type = 'car' AND (
             (DATETIME(b.start_time) BETWEEN ? AND ?) OR
             (DATETIME(b.end_time) BETWEEN ? AND ?) OR

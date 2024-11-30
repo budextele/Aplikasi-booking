@@ -112,6 +112,7 @@
                         <th style="text-align: center; vertical-align: middle;">Nama PIC</th>
                         <th style="text-align: center; vertical-align: middle;">Waktu Mulai</th>
                         <th style="text-align: center; vertical-align: middle;">Waktu Selesai</th>
+                        <th style="text-align: center; vertical-align: middle;">Tipe Booking</th>
                         <th style="text-align: center; vertical-align: middle;">Status</th>
                         <th style="text-align: center; vertical-align: middle;">Alasan Batal</th>
                         <th style="text-align: center; vertical-align: middle;">Keterangan</th>
@@ -257,9 +258,19 @@
 
                 // Tentukan kelas untuk kolom status secara spesifik
                 const statusClass = booking.status === 'active' ? 'text-success' :
-                  ''; // Warna hijau untuk "active"
+                  (booking.status === 'cancelled' ? 'text-danger' : ''); // Warna hijau untuk "active"
+
+                // Tentukan kelas untuk kolom booking_label berdasarkan nilainya
+                let bookingLabelClass = '';
+                if (booking.booking_label === 'Priority') {
+                  bookingLabelClass = 'text-danger'; // Merah untuk "Priority"
+                } else if (booking.booking_label === 'To Costumer') {
+                  bookingLabelClass = 'text-primary'; // Biru untuk "To Costumer"
+                } else if (booking.booking_label === 'Non-Priority') {
+                  bookingLabelClass = 'text-dark'; // Hitam untuk "Non-Priority"
+                }
                 const row = `
-              <tr class="${rowClass}">
+              <tr>
                 <td>${booking.id || '-'}</td>
                 <td>${booking.time_booking || '-'}</td>
                 <td>${booking.car_name || '-'}</td>
@@ -267,6 +278,7 @@
                 <td>${booking.pic_name || '-'}</td>
                 <td>${formatDateTime(booking.start_time) || '-'}</td>
                 <td>${formatDateTime(booking.end_time) || '-'}</td>
+                <td class="font-weight-bold ${bookingLabelClass}">${booking.booking_label || '-'}</td>
                 <td class="font-weight-bold text-uppercase ${statusClass}">${booking.status || '-'}</td>
                 <td>${booking.cancel_reason || '-'}</td>
                 <td>${booking.description || '-'}</td>
@@ -306,9 +318,9 @@
 
                 // Tentukan kelas untuk kolom status secara spesifik
                 const statusClass = booking.status === 'active' ? 'text-success' :
-                  ''; // Warna hijau untuk "active"
+                  (booking.status === 'cancelled' ? 'text-danger' : ''); // Warna hijau untuk "active"
                 const row = `
-              <tr class="${rowClass}">
+              <tr>
                 <td>${booking.id || '-'}</td>
                 <td>${booking.time_booking || '-'}</td>
                 <td>${booking.room_name || '-'}</td>
