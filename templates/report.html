@@ -251,8 +251,15 @@
 
               // Memasukkan data ke dalam tabel mobil
               data.forEach(booking => {
+                // Tentukan kelas untuk seluruh baris jika status adalah "cancelled"
+                const rowClass = booking.status === 'cancelled' ? 'text-danger' :
+                  ''; // Warna merah untuk semua teks di dalam <tr>
+
+                // Tentukan kelas untuk kolom status secara spesifik
+                const statusClass = booking.status === 'active' ? 'text-success' :
+                  ''; // Warna hijau untuk "active"
                 const row = `
-              <tr>
+              <tr class="${rowClass}">
                 <td>${booking.id || '-'}</td>
                 <td>${booking.time_booking || '-'}</td>
                 <td>${booking.car_name || '-'}</td>
@@ -260,7 +267,7 @@
                 <td>${booking.pic_name || '-'}</td>
                 <td>${formatDateTime(booking.start_time) || '-'}</td>
                 <td>${formatDateTime(booking.end_time) || '-'}</td>
-                <td>${booking.status || '-'}</td>
+                <td class="font-weight-bold text-uppercase ${statusClass}">${booking.status || '-'}</td>
                 <td>${booking.cancel_reason || '-'}</td>
                 <td>${booking.description || '-'}</td>
               </tr>
@@ -293,15 +300,22 @@
 
               // Memasukkan data ke dalam tabel ruangan
               data.forEach(booking => {
+                // Tentukan kelas untuk seluruh baris jika status adalah "cancelled"
+                const rowClass = booking.status === 'cancelled' ? 'text-danger' :
+                  ''; // Warna merah untuk semua teks di dalam <tr>
+
+                // Tentukan kelas untuk kolom status secara spesifik
+                const statusClass = booking.status === 'active' ? 'text-success' :
+                  ''; // Warna hijau untuk "active"
                 const row = `
-              <tr>
+              <tr class="${rowClass}">
                 <td>${booking.id || '-'}</td>
                 <td>${booking.time_booking || '-'}</td>
                 <td>${booking.room_name || '-'}</td>
                 <td>${booking.pic_name || '-'}</td>
                 <td>${formatDateTime(booking.start_time) || '-'}</td>
                 <td>${formatDateTime(booking.end_time) || '-'}</td>
-                <td>${booking.status || '-'}</td>
+                <td class="font-weight-bold text-uppercase ${statusClass}">${booking.status || '-'}</td>
                 <td>${booking.cancel_reason || '-'}</td>
                 <td>${booking.description || '-'}</td>
               </tr>
